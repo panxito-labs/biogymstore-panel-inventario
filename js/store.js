@@ -1,5 +1,5 @@
 /* ============================================================
-   BioGymStore — Store: estado de la aplicación + persistencia
+   BioGymStore — Store: estado de la aplicación + persistencia · Actualización 3.0
    Todo se guarda en localStorage. Para reiniciar los datos
    de demostración desde la consola del navegador: Store.reset()
    ============================================================ */

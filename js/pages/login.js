@@ -1,4 +1,4 @@
-/* Página: index.html (login) */
+/* Página: index.html (login) · Actualización 3.0 */
 
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("loginForm");

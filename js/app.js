@@ -1,5 +1,5 @@
 /* ============================================================
-   BioGymStore — app.js
+   BioGymStore — app.js · Actualización 3.0
    Utilidades compartidas, sesión global y navbar.
    Se carga en TODAS las páginas (antes de cada page script).
    Si el CDN de Bootstrap no carga, se activa el modo "no-bs":

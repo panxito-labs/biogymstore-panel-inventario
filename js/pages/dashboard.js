@@ -1,4 +1,4 @@
-/* Página: dashboard.html — KPIs, alertas por bodega y movimientos recientes */
+/* Página: dashboard.html — KPIs, alertas por bodega y movimientos recientes · Actualización 3.0 */
 
 document.addEventListener("DOMContentLoaded", () => {
   if (document.body.dataset.page !== "dashboard" || !Store.isLoggedIn()) return;

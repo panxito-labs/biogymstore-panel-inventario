@@ -1,4 +1,4 @@
-# BioGymStore — Evita que los buscadores indexen y muestren el panel.
+# BioGymStore — Evita que los buscadores indexen y muestren el panel · Actualización 3.0.
 # Nota: robots.txt evita la indexación, NO protege el contenido:
 # cualquiera con el enlace directo sigue pudiendo abrir los archivos.
 User-agent: *

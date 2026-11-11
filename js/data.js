@@ -1,5 +1,5 @@
 /* ============================================================
-   BioGymStore — Datos iniciales (semilla) del sistema
+   BioGymStore — Datos iniciales (semilla) del sistema · Actualización 3.0
    Se cargan la primera vez que se abre la aplicación y luego
    se persisten en localStorage. Las miniaturas usan iconos
    SVG definidos en js/icons.js (campo "icon").

@@ -1,4 +1,4 @@
-# BioGymStore — Cabeceras de seguridad para Apache (hosting compartido / cPanel / Hostinger).
+# BioGymStore — Cabeceras de seguridad para Apache (hosting compartido / cPanel / Hostinger) · Actualización 3.0.
 # Requiere el módulo mod_headers habilitado (lo está por defecto en la mayoría de hosts).
 
 <IfModule mod_headers.c>

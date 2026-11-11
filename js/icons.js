@@ -1,5 +1,5 @@
 /* ============================================================
-   BioGymStore — icons.js
+   BioGymStore — icons.js · Actualización 3.0
    Set de iconos SVG propios (estilo línea, 24x24), inspirado en
    Feather Icons (licencia MIT). Sin dependencias externas:
    funciona offline y reemplaza por completo el uso de emojis.
