@@ -1,29 +1,55 @@
 /* ============================================================
-   BioGymStore — Store: estado de la aplicación + persistencia
-   Todo se guarda en localStorage. Para reiniciar los datos
-   de demostración desde la consola del navegador: Store.reset()
+   BioGymStore — Store: estado de la aplicación
+   Semana 4: los datos propios se cargan con fetch desde
+   data/seed.json (ver js/data.js). La sesión y los cambios
+   viven en sessionStorage durante la pestaña; la persistencia
+   en localStorage llega en la entrega final (Semana 5).
+   Para reiniciar los datos de prueba: Store.reset()
    ============================================================ */
 
 const Store = (() => {
   const DB_KEY = "biogym_db_v1";
   const SESSION_KEY = "biogym_session";
   const LOW_STOCK = 3;
+  const storage = window.sessionStorage; // Semana 5: pasar a localStorage
 
-  let db;
+  let db = null;
+  let ready = null;
 
   const clone = (obj) => JSON.parse(JSON.stringify(obj));
 
-  function init() {
+  function safeGet(key) {
     try {
-      const raw = localStorage.getItem(DB_KEY);
-      db = raw ? JSON.parse(raw) : clone(SEED);
+      const raw = storage.getItem(key);
+      return raw ? JSON.parse(raw) : null;
     } catch (e) {
-      db = clone(SEED);
+      return null;
     }
   }
 
+  async function load() {
+    const cached = safeGet(DB_KEY);
+    if (cached) {
+      db = cached;
+      return;
+    }
+    try {
+      db = await loadSeedData();
+    } catch (e) {
+      db = clone(SEED);
+    }
+    save();
+  }
+
+  function init() {
+    if (!ready) {
+      ready = load().catch(() => { db = clone(SEED); });
+    }
+    return ready;
+  }
+
   function save() {
-    localStorage.setItem(DB_KEY, JSON.stringify(db));
+    try { storage.setItem(DB_KEY, JSON.stringify(db)); } catch (e) { /* sin espacio */ }
   }
 
   init();
@@ -37,18 +63,18 @@ const Store = (() => {
       email.trim().toLowerCase() === u.email.toLowerCase() &&
       password === u.password
     ) {
-      localStorage.setItem(SESSION_KEY, "true");
+      storage.setItem(SESSION_KEY, "true");
       return true;
     }
     return false;
   }
 
   function logout() {
-    localStorage.removeItem(SESSION_KEY);
+    storage.removeItem(SESSION_KEY);
   }
 
   function isLoggedIn() {
-    return localStorage.getItem(SESSION_KEY) === "true";
+    return storage.getItem(SESSION_KEY) === "true";
   }
 
   function currentUser() {
@@ -210,12 +236,13 @@ const Store = (() => {
   /* ---------- Utilidades ---------- */
 
   function reset() {
-    localStorage.removeItem(DB_KEY);
+    storage.removeItem(DB_KEY);
+    ready = null;
     init();
   }
 
   return {
-    login, logout, isLoggedIn, currentUser,
+    init, login, logout, isLoggedIn, currentUser,
     getProducts, getProduct, getCategories, totalStock, isBajoPedido, statusOf,
     skuExists, addProduct, addStock,
     transfer,
