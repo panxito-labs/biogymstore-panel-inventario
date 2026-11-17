@@ -55,20 +55,23 @@
         <div class="card h-100">
           <div class="card-header">Ingresar a producto existente</div>
           <div class="card-body">
-            <form id="restockForm">
+            <form id="restockForm" class="needs-validation" novalidate>
               <div class="mb-3">
                 <label for="restockProduct" class="form-label">Producto</label>
                 <select id="restockProduct" class="form-select" required></select>
+                <div class="invalid-feedback">Selecciona un producto.</div>
               </div>
               <div class="row g-3">
                 <div class="col-6">
                   <label for="restockQty" class="form-label">Cantidad (unidades)</label>
                   <input type="number" id="restockQty" class="form-control" min="1" value="1" required>
+                  <div class="invalid-feedback">Cantidad mayor a 0.</div>
                   <div class="form-text text-secondary" id="restockCajas"></div>
                 </div>
                 <div class="col-6">
                   <label for="restockDest" class="form-label">Destino</label>
                   <select id="restockDest" class="form-select" required></select>
+                  <div class="invalid-feedback">Selecciona un destino.</div>
                 </div>
               </div>
               <button type="submit" class="btn btn-accent w-100 mt-4">Registrar ingreso</button>
@@ -82,25 +85,29 @@
         <div class="card h-100">
           <div class="card-header">Crear producto nuevo</div>
           <div class="card-body">
-            <form id="newProductForm">
+            <form id="newProductForm" class="needs-validation" novalidate>
               <div class="mb-3">
                 <label for="newName" class="form-label">Nombre</label>
                 <input type="text" id="newName" class="form-control" placeholder="Ej: Proteína Whey 1kg" required>
+                <div class="invalid-feedback">Ingresa el nombre del producto.</div>
               </div>
               <div class="row g-3 mb-3">
                 <div class="col-6">
                   <label for="newSku" class="form-label">SKU</label>
                   <input type="text" id="newSku" class="form-control" placeholder="BG-SUP-100" required>
+                  <div class="invalid-feedback">Ingresa el SKU.</div>
                 </div>
                 <div class="col-6">
                   <label for="newCategory" class="form-label">Categoría</label>
                   <select id="newCategory" class="form-select" required></select>
+                  <div class="invalid-feedback">Selecciona una categoría.</div>
                 </div>
               </div>
               <div class="row g-3 mb-3">
                 <div class="col-6">
                   <label for="newPrice" class="form-label">Precio (CLP)</label>
                   <input type="number" id="newPrice" class="form-control" min="0" placeholder="19990" required>
+                  <div class="invalid-feedback">Ingresa un precio válido.</div>
                 </div>
                 <div class="col-6">
                   <label for="newBoxUnits" class="form-label">Un. por caja (opcional)</label>
@@ -122,10 +129,12 @@
                 <div class="col-6">
                   <label for="newQty" class="form-label">Stock inicial</label>
                   <input type="number" id="newQty" class="form-control" min="0" value="0" required>
+                  <div class="invalid-feedback">Stock inicial (0 o más).</div>
                 </div>
                 <div class="col-6">
                   <label for="newDest" class="form-label">Destino</label>
                   <select id="newDest" class="form-select" required></select>
+                  <div class="invalid-feedback">Selecciona un destino.</div>
                 </div>
               </div>
               <button type="submit" class="btn btn-accent w-100">Agregar al catálogo</button>

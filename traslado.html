@@ -56,24 +56,28 @@
         <section class="card">
           <div class="card-header">Trasladar stock</div>
           <div class="card-body">
-            <form id="transferForm">
+            <form id="transferForm" class="needs-validation" novalidate>
               <div class="mb-3">
                 <label for="transferProduct" class="form-label">Producto</label>
                 <select id="transferProduct" class="form-select" required></select>
+                <div class="invalid-feedback">Selecciona un producto.</div>
               </div>
               <div class="row g-3 mb-3">
                 <div class="col-6">
                   <label for="transferFrom" class="form-label">Origen</label>
                   <select id="transferFrom" class="form-select" required></select>
+                  <div class="invalid-feedback">Origen.</div>
                 </div>
                 <div class="col-6">
                   <label for="transferTo" class="form-label">Destino</label>
                   <select id="transferTo" class="form-select" required></select>
+                  <div class="invalid-feedback">Destino.</div>
                 </div>
               </div>
               <div class="mb-3">
                 <label for="transferQty" class="form-label">Cantidad (unidades)</label>
                 <input type="number" id="transferQty" class="form-control" min="1" value="1" required>
+                <div class="invalid-feedback">Cantidad mayor a 0.</div>
                 <div class="form-text text-secondary" id="availableInfo"></div>
               </div>
               <button type="submit" class="btn btn-accent w-100">Realizar traslado</button>
@@ -84,8 +88,11 @@
         <section class="card">
           <div class="card-header">Gestionar bodegas</div>
           <div class="card-body">
-            <form id="warehouseForm" class="d-flex gap-2 mb-3">
-              <input type="text" id="warehouseName" class="form-control" placeholder="Nombre de la nueva bodega" required>
+            <form id="warehouseForm" class="d-flex gap-2 mb-3 needs-validation" novalidate>
+              <div class="flex-grow-1">
+                <input type="text" id="warehouseName" class="form-control" placeholder="Nombre de la nueva bodega" required>
+                <div class="invalid-feedback">Ingresa un nombre.</div>
+              </div>
               <button type="submit" class="btn btn-accent btn-sm px-3">Agregar</button>
             </form>
             <ul id="warehouseList" class="list-group list-group-flush"></ul>
