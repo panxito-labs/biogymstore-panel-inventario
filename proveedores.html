@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'">
   <meta name="referrer" content="no-referrer">
   <title>Proveedores | BioGymStore</title>
   <link rel="icon" type="image/png" href="img/favicon.png">
@@ -44,8 +44,32 @@
   <main class="container py-4">
 
     <section class="mb-4">
-      <p class="text-secondary mb-1">Fichas de proveedores y productos bajo pedido</p>
+      <p class="text-secondary mb-1">Catálogos bajo pedido — proveedores de Santiago</p>
       <h1 class="h3 fw-bold mb-0">Proveedores</h1>
+    </section>
+
+    <!-- Tarjetas de proveedores -->
+    <section class="row row-cols-1 row-cols-md-2 row-cols-xl-4 g-3 mb-4" id="suppliersGrid" aria-label="Lista de proveedores"></section>
+
+    <!-- Productos bajo pedido -->
+    <section>
+      <h2 class="section-title mb-3">Productos bajo pedido</h2>
+      <div class="card p-3">
+        <div class="table-responsive">
+          <table class="table mb-0">
+            <thead>
+              <tr>
+                <th>SKU</th>
+                <th>Producto</th>
+                <th>Categoría</th>
+                <th>Proveedor</th>
+                <th class="text-end">Acción</th>
+              </tr>
+            </thead>
+            <tbody id="bajoPedidoBody"></tbody>
+          </table>
+        </div>
+      </div>
     </section>
 
     <footer class="app-footer text-center mt-4">
@@ -58,5 +82,6 @@
   <script src="js/store.js"></script>
   <script src="js/icons.js"></script>
   <script src="js/app.js"></script>
+  <script src="js/pages/proveedores.js"></script>
 </body>
 </html>

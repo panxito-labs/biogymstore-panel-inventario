@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'">
   <meta name="referrer" content="no-referrer">
   <title>Traslado | BioGymStore</title>
   <link rel="icon" type="image/png" href="img/favicon.png">
@@ -44,9 +44,79 @@
   <main class="container py-4">
 
     <section class="mb-4">
-      <p class="text-secondary mb-1">Movimiento de stock entre bodegas</p>
-      <h1 class="h3 fw-bold mb-0">Traslado</h1>
+      <p class="text-secondary mb-1">Mover unidades entre bodegas</p>
+      <h1 class="h3 fw-bold mb-0">Traslado de <span class="text-accent">Stock</span></h1>
     </section>
+
+    <div class="row g-4">
+
+      <!-- Formulario de traslado + gestión de bodegas -->
+      <div class="col-lg-4 d-flex flex-column gap-4">
+
+        <section class="card">
+          <div class="card-header">Trasladar stock</div>
+          <div class="card-body">
+            <form id="transferForm">
+              <div class="mb-3">
+                <label for="transferProduct" class="form-label">Producto</label>
+                <select id="transferProduct" class="form-select" required></select>
+              </div>
+              <div class="row g-3 mb-3">
+                <div class="col-6">
+                  <label for="transferFrom" class="form-label">Origen</label>
+                  <select id="transferFrom" class="form-select" required></select>
+                </div>
+                <div class="col-6">
+                  <label for="transferTo" class="form-label">Destino</label>
+                  <select id="transferTo" class="form-select" required></select>
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="transferQty" class="form-label">Cantidad (unidades)</label>
+                <input type="number" id="transferQty" class="form-control" min="1" value="1" required>
+                <div class="form-text text-secondary" id="availableInfo"></div>
+              </div>
+              <button type="submit" class="btn btn-accent w-100">Realizar traslado</button>
+            </form>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-header">Gestionar bodegas</div>
+          <div class="card-body">
+            <form id="warehouseForm" class="d-flex gap-2 mb-3">
+              <input type="text" id="warehouseName" class="form-control" placeholder="Nombre de la nueva bodega" required>
+              <button type="submit" class="btn btn-accent btn-sm px-3">Agregar</button>
+            </form>
+            <ul id="warehouseList" class="list-group list-group-flush"></ul>
+          </div>
+        </section>
+      </div>
+
+      <!-- Historial de movimientos -->
+      <section class="col-lg-8">
+        <div class="card h-100">
+          <div class="card-header">Historial de movimientos</div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table mb-0">
+                <thead>
+                  <tr>
+                    <th>Fecha</th>
+                    <th>Producto</th>
+                    <th>Tipo</th>
+                    <th>Origen / Destino</th>
+                    <th class="text-end">Unidades</th>
+                    <th>Usuario</th>
+                  </tr>
+                </thead>
+                <tbody id="movementsBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
 
     <footer class="app-footer text-center mt-4">
       BioGymStore — Sistema interno de gestión de stock · Uso exclusivo del personal autorizado
@@ -58,5 +128,6 @@
   <script src="js/store.js"></script>
   <script src="js/icons.js"></script>
   <script src="js/app.js"></script>
+  <script src="js/pages/traslado.js"></script>
 </body>
 </html>
