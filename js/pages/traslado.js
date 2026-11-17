@@ -59,6 +59,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   form.addEventListener("submit", (e) => {
     e.preventDefault();
+    if (!form.checkValidity()) { form.classList.add("was-validated"); return; }
     const res = Store.transfer(prodSel.value, fromSel.value, toSel.value, qtyInput.value);
     toast(res.msg, res.ok);
     if (res.ok) {
@@ -93,6 +94,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   whForm.addEventListener("submit", (e) => {
     e.preventDefault();
+    if (!whForm.checkValidity()) { whForm.classList.add("was-validated"); return; }
     const res = Store.addWarehouse(whName.value);
     toast(res.msg, res.ok);
     if (res.ok) {

@@ -63,6 +63,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   restockForm.addEventListener("submit", (e) => {
     e.preventDefault();
+    if (!restockForm.checkValidity()) { restockForm.classList.add("was-validated"); return; }
     const res = Store.addStock(restockProduct.value, restockQty.value, restockDest.value);
     toast(res.msg, res.ok);
     if (res.ok) {
@@ -92,6 +93,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   /* ---- Crear producto nuevo ---- */
   newForm.addEventListener("submit", (e) => {
     e.preventDefault();
+    if (!newForm.checkValidity()) { newForm.classList.add("was-validated"); return; }
     const sku = document.getElementById("newSku").value;
     if (Store.skuExists(sku)) {
       toast(`El SKU ${sku.toUpperCase()} ya existe en el catálogo.`, false);
