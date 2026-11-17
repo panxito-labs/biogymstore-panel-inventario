@@ -1,12 +1,3 @@
-/* ============================================================
-   BioGymStore — Store: estado de la aplicación
-   Semana 4: los datos propios se cargan con fetch desde
-   data/seed.json (ver js/data.js). La sesión y los cambios
-   viven en sessionStorage durante la pestaña; la persistencia
-   en localStorage llega en la entrega final (Semana 5).
-   Para reiniciar los datos de prueba: Store.reset()
-   ============================================================ */
-
 const Store = (() => {
   const DB_KEY = "biogym_db_v1";
   const SESSION_KEY = "biogym_session";

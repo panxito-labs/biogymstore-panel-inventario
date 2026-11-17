@@ -1,16 +1,5 @@
-/* ============================================================
-   BioGymStore — Datos iniciales (semilla) del sistema
-   Los datos propios viven en data/seed.json y se cargan con
-   fetch (loadSeedData). SEED es el respaldo offline. Las
-   miniaturas usan iconos SVG de js/icons.js (campo "icon").
-   ============================================================ */
-
 const SEED = {
   user: {
-    // Credenciales de DEMOSTRACIÓN (visibles a propósito).
-    // Este proyecto es 100% frontend: cualquier login hecho en el navegador
-    // es una simulación, no seguridad real. Proteger un acceso de verdad
-    // requiere un backend. Ver README_DESPLIEGUE.md.
     email: "demo@biogym.cl",
     password: "demo1234",
     nombre: "Usuario Demo",
@@ -102,8 +91,6 @@ const SEED = {
   movements: []
 };
 
-/* Carga los datos del catálogo desde data/seed.json.
-   Si falla (p. ej. abrir con file:// sin servidor), Store usa SEED como respaldo. */
 async function loadSeedData() {
   const res = await fetch("data/seed.json");
   if (!res.ok) throw new Error("HTTP " + res.status);

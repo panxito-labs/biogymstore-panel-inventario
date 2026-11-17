@@ -1,11 +1,3 @@
-/* ============================================================
-   BioGymStore — app.js
-   Utilidades compartidas, sesión global y navbar.
-   Se carga en TODAS las páginas (antes de cada page script).
-   Si el CDN de Bootstrap no carga, se activa el modo "no-bs":
-   el diseño propio (css/styles.css) mantiene todo el sitio.
-   ============================================================ */
-
 /* Si Bootstrap no cargó (sin internet), usar respaldo offline */
 (function () {
   var cssLoaded = false;
