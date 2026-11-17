@@ -1,8 +1,8 @@
 /* ============================================================
    BioGymStore — Datos iniciales (semilla) del sistema
-   Se cargan la primera vez que se abre la aplicación y luego
-   se persisten en localStorage. Las miniaturas usan iconos
-   SVG definidos en js/icons.js (campo "icon").
+   Los datos propios viven en data/seed.json y se cargan con
+   fetch (loadSeedData). SEED es el respaldo offline. Las
+   miniaturas usan iconos SVG de js/icons.js (campo "icon").
    ============================================================ */
 
 const SEED = {
@@ -101,3 +101,11 @@ const SEED = {
   ],
   movements: []
 };
+
+/* Carga los datos del catálogo desde data/seed.json.
+   Si falla (p. ej. abrir con file:// sin servidor), Store usa SEED como respaldo. */
+async function loadSeedData() {
+  const res = await fetch("data/seed.json");
+  if (!res.ok) throw new Error("HTTP " + res.status);
+  return res.json();
+}
