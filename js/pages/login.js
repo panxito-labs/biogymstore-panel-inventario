@@ -3,8 +3,9 @@
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("loginForm");
 
-  form.addEventListener("submit", (e) => {
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
+    await Store.init();
     const email = form.username.value;
     const password = form.password.value;
 
