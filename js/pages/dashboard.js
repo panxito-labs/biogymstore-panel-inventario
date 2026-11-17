@@ -1,7 +1,8 @@
 /* Página: dashboard.html — KPIs, alertas por bodega y movimientos recientes */
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   if (document.body.dataset.page !== "dashboard" || !Store.isLoggedIn()) return;
+  await Store.init();
 
   const products = Store.getProducts();
   const warehouses = Store.getWarehouses();

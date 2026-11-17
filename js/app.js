@@ -92,7 +92,7 @@ function toast(msg, ok = true) {
 
 /* ---------- Sesión global y navbar ---------- */
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   const page = document.body.dataset.page;
 
   if (page !== "login") {
@@ -101,6 +101,7 @@ document.addEventListener("DOMContentLoaded", () => {
       window.location.replace("index.html");
       return;
     }
+    await Store.init();
     renderUser();
   } else if (Store.isLoggedIn()) {
     // Con sesión iniciada, el login redirige al dashboard
