@@ -37,7 +37,8 @@ Para restaurar los datos de prueba: consola del navegador (F12) → `Store.reset
   unidades, ingresos y ventas, con gráfico de barras y filtro por
   **semana / mes / año**.
 - **Ingreso de stock** — suma unidades a un producto existente o crea productos
-  nuevos (SKU único, recuento automático de cajas).
+  nuevos (SKU único, recuento automático de cajas) con **imagen por URL o por
+  archivo**.
 - **Traslado** — mueve stock entre bodegas con validación de disponibilidad;
   gestión de bodegas (agregar/eliminar) e historial de movimientos.
 - **Proveedores** — fichas de proveedores y productos "bajo pedido" con cotización
@@ -99,6 +100,29 @@ No existían datos de ventas, así que se genera una colección demo en `db.sale
 Los assets se cargan con `?v=` (cache-busting) y el pie de página muestra la
 etiqueta de versión del build: si cambias algo y no lo ves en línea, un
 `Ctrl+F5` descarta la copia guardada del navegador.
+
+---
+
+## Imágenes de producto
+
+Al crear un producto nuevo (`ingreso-stock.html`) el campo **Imagen** ofrece dos
+orígenes, con vista previa en vivo en la miniatura:
+
+| Modo | Cómo funciona |
+|------|---------------|
+| **URL** | Se pega un enlace `https://...` y la vista previa aparece al escribir. |
+| **Archivo** | Zona de arrastre: clic para elegir un archivo o **arrastrar y soltar** la imagen (JPG, PNG o WebP). Muestra nombre y dimensiones al cargarla. |
+
+Antes de guardar, la imagen subida pasa por un `<canvas>` que:
+
+- la **redimensiona a 600 px** como máximo (manteniendo proporción),
+- la recompresa: **PNG/WebP** conservan transparencia, el resto va a **JPEG**
+  calidad 0.82,
+- la guarda como *data URL* (`data:image/...`) dentro de `sessionStorage`.
+
+Así una foto pesada no rellena el almacenamiento de la sesión. `productThumb()`
+en `js/app.js` reconoce tanto `https://` como `data:image/` y, si no hay imagen,
+muestra el icono SVG correspondiente.
 
 ---
 
