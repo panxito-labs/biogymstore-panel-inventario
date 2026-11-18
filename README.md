@@ -5,10 +5,6 @@ proyecto del curso de desarrollo web. Resuelve una necesidad real del negocio:
 llevar el control de stock de productos (suplementos, pesas, indumentaria) entre
 múltiples bodegas, con registro de ingresos y traslados.
 
-> **Estado actual:** prototipo funcional en frontend. Los datos se guardan en la
-> `sessionStorage` del navegador (cada usuario ve su propio inventario de prueba).
-> La integración con backend y la API de Bsale quedan como mejora futura.
-
 ---
 
 ### Sitio en línea
