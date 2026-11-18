@@ -22,6 +22,7 @@ const Store = (() => {
     const cached = safeGet(DB_KEY);
     if (cached) {
       db = cached;
+      ensureSales();
       return;
     }
     try {
@@ -29,12 +30,13 @@ const Store = (() => {
     } catch (e) {
       db = clone(SEED);
     }
+    ensureSales();
     save();
   }
 
   function init() {
     if (!ready) {
-      ready = load().catch(() => { db = clone(SEED); });
+      ready = load().catch(() => { db = clone(SEED); ensureSales(); });
     }
     return ready;
   }
@@ -224,6 +226,112 @@ const Store = (() => {
     return db.products.filter((p) => p.bajoPedido);
   }
 
+  /* ---------- Ventas (historial de demostración) ---------- */
+
+  /* PRNG determinista: genera siempre la misma serie de ventas */
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  /* Últimos 365 días. Hoy siempre tiene ventas (para que el filtro
+     DÍA nunca quede vacío); el resto sigue un patrón de lunes a viernes
+     con picos los sábados y bajada los domingos. */
+  function generateDemoSales() {
+    const rnd = mulberry32(20261015);
+    const items = db.products.filter((p) => !p.bajoPedido);
+    const out = [];
+    const now = new Date();
+    const hoy = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const margenHoy = Math.max(now.getTime() - hoy.getTime(), 1);
+
+    for (let d = 364; d >= 0; d--) {
+      const dia = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() - d);
+      const dow = dia.getDay();
+      const prob = dow === 0 ? 0.2 : dow === 6 ? 0.7 : 0.5;
+
+      items.forEach((p) => {
+        /* d === 0 (hoy): siempre; resto: según probabilidad */
+        if (d !== 0 && rnd() >= prob) return;
+        const n = d === 0 ? 1 + Math.floor(rnd() * 2) : 1 + Math.floor(rnd() * 2);
+
+        for (let i = 0; i < n; i++) {
+          const unidades = 1 + Math.floor(rnd() * 3);
+          /* Hoy: repartido entre 00:00 y ahora. Otros días: 8:00 - 20:59 */
+          const fecha = d === 0
+            ? new Date(hoy.getTime() + Math.floor(rnd() * margenHoy))
+            : new Date(dia.getFullYear(), dia.getMonth(), dia.getDate(),
+                       8 + Math.floor(rnd() * 13), Math.floor(rnd() * 60));
+          if (fecha > now) continue;
+          out.push({
+            id: out.length + 1,
+            fecha: fecha.toISOString(),
+            productoId: p.id,
+            unidades,
+            total: p.precio * unidades
+          });
+        }
+      });
+    }
+    return out.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+  }
+
+  function ensureSales() {
+    if (!db) return;
+    if (!Array.isArray(db.sales) || db.sales.length === 0) {
+      db.sales = generateDemoSales();
+    }
+  }
+
+  /* Estadística de un producto en el periodo indicado */
+  function statsFor(id, period) {
+    const now = new Date();
+    const y = now.getFullYear(), m = now.getMonth(), d = now.getDate();
+    let from, buckets, labels;
+
+    if (period === "semana") {
+      const dow = (now.getDay() + 6) % 7; /* 0 = lunes */
+      from = new Date(y, m, d - dow, 0, 0, 0, 0);
+      buckets = new Array(7).fill(0);
+      labels = ["L", "M", "MI", "J", "V", "S", "D"];
+    } else if (period === "anio") {
+      from = new Date(y, 0, 1);
+      buckets = new Array(12).fill(0);
+      labels = ["E", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];
+    } else {
+      /* mes (por defecto) */
+      from = new Date(y, m, 1);
+      const dias = new Date(y, m + 1, 0).getDate();
+      buckets = new Array(dias).fill(0);
+      labels = Array.from({ length: dias }, (_, i) => String(i + 1));
+    }
+
+    let unidades = 0, ingresos = 0, ventas = 0;
+    const pid = Number(id);
+
+    for (const s of db.sales) {
+      if (Number(s.productoId) !== pid) continue;
+      const f = new Date(s.fecha);
+      if (f < from || f > now) continue;
+      ventas += 1;
+      unidades += s.unidades;
+      ingresos += s.total;
+      if (period === "semana") buckets[(f.getDay() + 6) % 7] += s.unidades;
+      else if (period === "anio") buckets[f.getMonth()] += s.unidades;
+      else if (f.getMonth() === m) buckets[f.getDate() - 1] += s.unidades;
+    }
+
+    return { unidades, ingresos, ventas, buckets, labels };
+  }
+
+  function getSales() {
+    return db.sales.slice();
+  }
+
   /* ---------- Utilidades ---------- */
 
   function reset() {
@@ -239,6 +347,7 @@ const Store = (() => {
     transfer,
     getWarehouses, addWarehouse, removeWarehouse,
     getMovements,
+    getSales, statsFor,
     getSuppliers, getBajoPedido,
     reset, LOW_STOCK
   };

@@ -85,6 +85,58 @@
     </footer>
   </main>
 
+  <!-- VENTANA DE DETALLE DE PRODUCTO -->
+  <div class="modal fade product-modal" id="productModal" tabindex="-1" role="dialog" aria-labelledby="pmName" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <span class="sku-code" id="pmSku">—</span>
+          <button type="button" class="pm-close" data-bs-dismiss="modal" aria-label="Cerrar ventana">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <!-- FOTO -->
+          <div class="pm-head">
+            <div class="pm-photo" id="pmPhoto"></div>
+            <div class="pm-info">
+              <!-- NOMBRE -->
+              <h2 class="pm-name" id="pmName">—</h2>
+              <div class="pm-meta">
+                <span class="pm-cat" id="pmCat">—</span>
+                <span id="pmStatus"></span>
+              </div>
+              <div class="pm-price" id="pmPrice">—</div>
+            </div>
+          </div>
+
+          <!-- DESCRIPCIÓN -->
+          <p class="pm-desc" id="pmDesc">—</p>
+
+          <!-- ESTADÍSTICA DE VENTAS -->
+          <div class="pm-stats">
+            <div class="pm-stats-head">
+              <span class="section-title">Ventas</span>
+              <div class="pm-filter" id="pmFilter" role="group" aria-label="Filtrar por periodo">
+                <button type="button" data-period="semana">Semana</button>
+                <button type="button" data-period="mes" class="active">Mes</button>
+                <button type="button" data-period="anio">Año</button>
+              </div>
+            </div>
+
+            <div class="pm-kpis" id="pmKpis"></div>
+            <div class="pm-chart" id="pmChart" aria-hidden="true"></div>
+            <div class="pm-axis" id="pmAxis" aria-hidden="true"></div>
+            <p class="pm-nosales d-none" id="pmNoSales">Sin ventas registradas en este periodo.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
   <script src="vendor/js/bootstrap.bundle.min.js"></script>
   <script src="js/data.js"></script>
   <script src="js/store.js"></script>

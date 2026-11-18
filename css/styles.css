@@ -59,7 +59,14 @@ a:hover { color: #e6cf00; }
 .badge-soft-secondary { background-color: rgba(136, 136, 136, .15); color: #aaaaaa; }
 
 /* ---------- SKU ---------- */
-.sku-code { font-family: "Courier New", monospace; color: #ffe600; font-weight: 600; font-size: .8rem; }
+.sku-code {
+  font-family: var(--font);
+  color: #ffe600;
+  font-weight: 700;
+  font-size: .78rem;
+  letter-spacing: .04em;
+  white-space: nowrap;
+}
 
 /* ---------- Miniatura de producto ---------- */
 .thumb {
@@ -357,6 +364,125 @@ body.no-bs .list-group-item {
 .toast .btn-close::after { content: "x"; font-weight: 700; }
 .text-bg-success { border-color: rgba(34,197,94,.5) !important; }
 .text-bg-danger { border-color: rgba(239,68,68,.5) !important; }
+
+/* ============================================================
+   VENTANA DE DETALLE DE PRODUCTO (modal pequeño)
+   ============================================================ */
+.product-modal .modal-dialog { max-width: 620px; margin: 1.75rem auto; }
+.product-modal .modal-content {
+  background-color: #121212;
+  border: 1px solid #262626;
+  border-radius: 18px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, .8);
+  overflow: hidden;
+}
+.product-modal .modal-header {
+  background-color: #161616;
+  border-bottom: 1px solid #262626;
+  padding: .8rem 1.1rem;
+  align-items: center;
+  justify-content: space-between;
+}
+.product-modal .modal-body { padding: 1.15rem 1.15rem 1.3rem; }
+
+/* Botón cerrar propio (sin depender del filtro de tema de Bootstrap) */
+.pm-close {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; padding: 0;
+  background-color: transparent; border: 1px solid #333333; border-radius: 8px;
+  color: #a0a0a0; cursor: pointer; transition: border-color .2s, color .2s;
+}
+.pm-close:hover { border-color: #ffe600; color: #ffe600; }
+.pm-close .icon { width: 15px; height: 15px; }
+
+/* Fila: foto + datos */
+.pm-head { display: flex; align-items: flex-start; gap: 14px; }
+.pm-photo {
+  width: 96px; height: 96px; flex: 0 0 96px;
+  display: flex; align-items: center; justify-content: center;
+  background-color: #1a1a1a; border: 1px solid #262626;
+  border-radius: 14px; overflow: hidden; color: #ffe600;
+}
+.pm-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pm-photo .icon { width: 40px; height: 40px; }
+
+.pm-info { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 7px; }
+.pm-name {
+  margin: 0; font-size: 16px; font-weight: 800; line-height: 1.3;
+  color: #ffffff; overflow-wrap: break-word;
+}
+.pm-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.pm-cat {
+  font-size: 11px; font-weight: 700; color: #ffe600;
+  background-color: rgba(255, 230, 0, .1);
+  border: 1px solid rgba(255, 230, 0, .25);
+  padding: 3px 9px; border-radius: 20px;
+}
+.pm-price { font-size: 18px; font-weight: 800; color: #ffffff; }
+
+/* Descripción */
+.pm-desc {
+  margin: 14px 0 0; padding-top: 13px;
+  border-top: 1px solid #262626;
+  font-size: 13px; line-height: 1.6; color: #a0a0a0;
+}
+
+/* Filas de la tabla clicables */
+#inventoryBody .product-row { cursor: pointer; transition: background-color .15s; }
+#inventoryBody .product-row:hover { background-color: #1a1a1a; }
+#inventoryBody .product-row:focus { outline: 2px solid #ffe600; outline-offset: -2px; }
+
+/* ---------- Estadística de ventas dentro de la ventana ---------- */
+.pm-stats { margin-top: 15px; padding-top: 14px; border-top: 1px solid #262626; }
+.pm-stats-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 11px; }
+
+/* Filtro Día / Semana / Mes / Año */
+.pm-filter {
+  display: flex; gap: 2px; padding: 3px;
+  background-color: #1a1a1a; border: 1px solid #262626; border-radius: 9px;
+}
+.pm-filter button {
+  border: none; background: transparent; color: #888888;
+  font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+  padding: 5px 9px; border-radius: 6px; cursor: pointer; transition: color .15s, background-color .15s;
+}
+.pm-filter button:hover { color: #ffffff; }
+.pm-filter button.active { background-color: #ffe600; color: #000000; }
+
+/* Indicadores */
+.pm-kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.pm-kpi {
+  background-color: #1a1a1a; border: 1px solid #262626;
+  border-radius: 10px; padding: 9px 10px; min-width: 0;
+}
+.pm-kpi .k-label {
+  font-size: 9px; font-weight: 700; color: #888888;
+  text-transform: uppercase; letter-spacing: .08em;
+}
+.pm-kpi .k-value {
+  font-size: 17px; font-weight: 800; color: #ffffff;
+  margin-top: 3px; overflow: hidden; text-overflow: ellipsis;
+}
+.pm-kpi .k-value.accent { color: #ffe600; }
+
+/* Gráfico de barras (sin librerías) */
+.pm-chart { display: flex; align-items: flex-end; gap: 2px; height: 54px; margin-top: 12px; }
+.pm-bar {
+  flex: 1 1 0; min-width: 0;
+  background: linear-gradient(180deg, #ffe600 0%, #c9b800 100%);
+  border-radius: 2px; transition: height .3s ease;
+}
+.pm-bar.empty { background-color: #242424; }
+.pm-axis { display: flex; gap: 2px; margin-top: 5px; }
+.pm-axis span {
+  flex: 1 1 0; min-width: 0; text-align: center;
+  font-size: 8px; color: #666666; overflow: hidden;
+}
+.pm-nosales {
+  margin: 10px 0 0; font-size: 12px; color: #888888;
+  background-color: #1a1a1a; border: 1px dashed #333333;
+  border-radius: 8px; padding: 10px; text-align: center;
+}
 
 
 

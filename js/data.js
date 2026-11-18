@@ -10,56 +10,65 @@ const SEED = {
   categories: ["Suplementos", "Pesas", "Indumentaria", "Accesorios", "Nutrición", "Barritas"],
   products: [
     {
-      id: 1, sku: "BG-SUP-001", nombre: "Proteína Whey ISO 2kg", categoria: "Suplementos",
-      precio: 34990, descripcion: "Whey proteína aislada, sabor chocolate, bolsa 2 kg.",
+      id: 1, sku: "BG-SUP-001", nombre: "Iso 100 1.6 lb Fruity Pebbles - Dymatize Nutrition - Proteina Isolatada", categoria: "Suplementos",
+      precio: 34990, descripcion: "Proteína aislada Dymatize ISO 100, sabor Fruity Pebbles, formato 1.6 lb.",
+      imagen: "https://cdn.shopify.com/s/files/1/0545/6435/6267/files/176585-1600-auto.webp?v=1794868917",
       icon: "zap", cajaUnits: 0,
       stock: { "Bodega Tienda": 45, "Bodega Casa Jefe": 10 }
     },
     {
-      id: 2, sku: "BG-SUP-002", nombre: "Proteína Whey 2kg Vainilla", categoria: "Suplementos",
-      precio: 29990, descripcion: "Whey proteína concentrada, sabor vainilla, bolsa 2 kg.",
+      id: 2, sku: "BG-SUP-002", nombre: "WHEY BLEND PROTEIN STRONGEST 2KG", categoria: "Suplementos",
+      precio: 29990, descripcion: "Whey proteína concentrada Strongest, sabor chocolate, formato 2 kg.",
+      imagen: "https://cdn.shopify.com/s/files/1/0545/6435/6267/files/chocolate2kg.jpg?v=1749940137",
       icon: "zap", cajaUnits: 0,
       stock: { "Bodega Tienda": 2, "Bodega Casa Jefe": 8 }
     },
     {
       id: 3, sku: "BG-SUP-010", nombre: "Creatina Ostrovit 500g", categoria: "Suplementos",
       precio: 19990, descripcion: "Creatina monohidrato en polvo, 500 g.",
+      imagen: "https://cdn.shopify.com/s/files/1/0545/6435/6267/files/CREATINA-MONOHIDRATADA-NATURAL-500G_1.webp?v=1718659562",
       icon: "dumbbell", cajaUnits: 0,
       stock: { "Bodega Tienda": 0, "Bodega Casa Jefe": 6 }
     },
     {
       id: 4, sku: "BG-SUP-020", nombre: "Cafeína 200mg (60 cáps.)", categoria: "Suplementos",
       precio: 9990, descripcion: "Suplemento de cafeína anhidra, 60 cápsulas.",
+      imagen: "https://cdn.shopify.com/s/files/1/0545/6435/6267/files/productosextremosur-37.webp?v=1763840414",
       icon: "coffee", cajaUnits: 0,
       stock: { "Bodega Tienda": 3, "Bodega Casa Jefe": 0 }
     },
     {
-      id: 5, sku: "BG-EQU-042", nombre: "Mancuerna Hexagonal 15kg", categoria: "Pesas",
-      precio: 59990, descripcion: "Par de mancuernas hexagonales de 15 kg (c/u).",
+      id: 5, sku: "BG-EQU-042", nombre: "Mancuerna Hexagonal 27,5kg (Par)", categoria: "Pesas",
+      precio: 59990, descripcion: "Par de mancuernas hexagonales de 27,5 kg.",
+      imagen: "https://cdn.shopify.com/s/files/1/0545/6435/6267/files/275-kg-mcfitness.png?v=1721141248",
       icon: "dumbbell", cajaUnits: 0,
       stock: { "Bodega Tienda": 4, "Bodega Casa Jefe": 0 }
     },
     {
       id: 6, sku: "BG-EQU-050", nombre: "Barra Olímpica 20kg", categoria: "Pesas",
       precio: 79990, descripcion: "Barra olímpica de 20 kg, 220 cm.",
+      imagen: "https://cdn.shopify.com/s/files/1/0545/6435/6267/files/barra-olimpica-power-bar-20kg-kong.jpg?v=1744489071",
       icon: "dumbbell", cajaUnits: 0,
       stock: { "Bodega Tienda": 6, "Bodega Casa Jefe": 2 }
     },
     {
-      id: 7, sku: "BG-IND-030", nombre: "Polera Dry-Fit BioGym", categoria: "Indumentaria",
-      precio: 9990, descripcion: "Polera deportiva transpirable, tallas S a XXL.",
+      id: 7, sku: "BG-IND-030", nombre: "POLERA DRY MULTIPROPOSITO OLYMPHUS", categoria: "Indumentaria",
+      precio: 9990, descripcion: "Polera deportiva dry multipropósito OLYMPHUS, transpirable.",
+      imagen: "https://cdn.shopify.com/s/files/1/0545/6435/6267/files/polera-dry-verde-1000x1000.jpg?v=1729702188",
       icon: "tag", cajaUnits: 0,
       stock: { "Bodega Tienda": 15, "Bodega Casa Jefe": 5 }
     },
     {
-      id: 8, sku: "BG-NUT-005", nombre: "Barrita de Proteína", categoria: "Barritas",
-      precio: 1490, descripcion: "Barrita de proteína sabor chocolate. Se despacha por caja de 24 unidades.",
+      id: 8, sku: "BG-NUT-005", nombre: "Protein Bite Chocolate Crunch (unidad)", categoria: "Barritas",
+      precio: 1490, descripcion: "Protein Bite sabor Chocolate Crunch, venta por unidad.",
+      imagen: "https://cdn.shopify.com/s/files/1/0545/6435/6267/files/yg-foil_1000x1000_proteinbite-chocolate-crunch-f962db4e-2691-413a-961f-79b0ac3b245d_1800x1800_00add646-92f0-46cc-abe9-ca04a0c4c619.webp?v=1786933494",
       icon: "zap", cajaUnits: 24,
       stock: { "Bodega Tienda": 48, "Bodega Casa Jefe": 24 }
     },
     {
       id: 9, sku: "BG-ACC-012", nombre: "Correa de Levantamiento", categoria: "Accesorios",
       precio: 7990, descripcion: "Correa de soporte para levantamiento de pesas.",
+      imagen: "https://cdn.shopify.com/s/files/1/0545/6435/6267/files/correas-de-levantamiento-hard-03-negro-par-hwm_a98fcbab-5a05-48bd-9cd9-376ab8233f82.jpg?v=1758558784",
       icon: "box", cajaUnits: 0,
       stock: { "Bodega Tienda": 12, "Bodega Casa Jefe": 4 }
     },
