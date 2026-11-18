@@ -5,8 +5,8 @@ proyecto del curso de desarrollo web. Resuelve una necesidad real del negocio:
 llevar el control de stock de productos (suplementos, pesas, indumentaria) entre
 múltiples bodegas, con registro de ingresos y traslados.
 
-> **Estado actual:** prototipo funcional en frontend. Los datos se guardan en el
-> `localStorage` del navegador (cada usuario ve su propio inventario de prueba).
+> **Estado actual:** prototipo funcional en frontend. Los datos se guardan en la
+> `sessionStorage` del navegador (cada usuario ve su propio inventario de prueba).
 > La integración con backend y la API de Bsale quedan como mejora futura.
 
 ---
@@ -34,6 +34,12 @@ Para restaurar los datos de prueba: consola del navegador (F12) → `Store.reset
   accesos rápidos y movimientos recientes.
 - **Inventario** — listado de productos con stock por bodega, búsqueda en vivo y
   filtro por categoría.
+- **Vista de detalle de producto** — ventana emergente (modal) al hacer clic o
+  Enter sobre una fila: foto real del producto, SKU, nombre, categoría, estado,
+  precio y descripción.
+- **Estadística de ventas** (dentro de la ventana de detalle) — indicadores de
+  unidades, ingresos y ventas, con gráfico de barras y filtro por
+  **semana / mes / año**.
 - **Ingreso de stock** — suma unidades a un producto existente o crea productos
   nuevos (SKU único, recuento automático de cajas).
 - **Traslado** — mueve stock entre bodegas con validación de disponibilidad;
@@ -48,19 +54,55 @@ Para restaurar los datos de prueba: consola del navegador (F12) → `Store.reset
 ```
 index.html            Inicio de sesión
 dashboard.html        Panel principal
-inventario.html       Listado de productos
+inventario.html       Listado de productos + ventana de detalle
 ingreso-stock.html    Ingreso y creación de productos
 traslado.html         Traslados y bodegas
 proveedores.html      Proveedores y pedidos
 css/styles.css        Estilos propios (paleta #0d0d0d / #121212 / #ffe600)
-js/data.js            Datos semilla (credenciales demo, productos, bodegas)
-js/store.js           Estado de la app + persistencia en localStorage
+data/seed.json        Datos semilla canónicos (productos, bodegas, credenciales)
+js/data.js            Respaldo de datos semilla + carga de seed.json
+js/store.js           Estado, persistencia y motor de estadística de ventas
 js/icons.js           Set de iconos SVG propios (sin emojis)
 js/app.js             Compartido: sesión, navbar, utilidades
 js/pages/*.js         Lógica específica de cada página
 img/                  Logo BioGym (PNG oficial)
 vendor/               Bootstrap 5.3.3 local (CSS + JS bundle)
 ```
+
+---
+
+## Ventana de detalle y estadística de ventas
+
+Al hacer clic (o `Enter`) sobre una fila del inventario se abre una ventana con
+la ficha del producto:
+
+- **Foto, SKU, nombre, categoría, estado, precio y descripción.** Las imágenes
+  son las fotos reales del catálogo de [biogymstore.cl](https://biogymstore.cl/);
+  los productos renombrados se ajustaron al nombre y descripción de la tienda.
+- **Bloque de ventas** con filtro **Semana / Mes / Año**:
+  - indicadores: *Unidades*, *Ingresos* y *Ventas* del periodo,
+  - gráfico de barras CSS (sin librerías) con el eje correspondiente:
+    días 1..30 en el mes, `L M MI J V S D` en la semana, `E..D` en el año.
+
+### Motor de ventas (`js/store.js`)
+
+No existían datos de ventas, así que se genera una colección demo en `db.sales`:
+
+- **2463 registros** de los últimos 365 días, con patrón realista
+  (picos los sábados, baja los domingos) y ventas siempre presentes "hoy".
+- Generador **determinista** (`mulberry32`, semilla `20261015`): siempre produce
+  la misma serie, anclada a la fecha actual.
+- Cada registro: `{ fecha, productoId, unidades, total }`.
+- `Store.statsFor(id, periodo)` devuelve totales, casilleros y rótulos del eje;
+  la suma de las barras siempre coincide con las unidades del indicador.
+- Si en el futuro se agrega un módulo "Registrar Venta", basta con
+  `db.sales.push(...)` y la estadística lo lee sin cambios.
+
+### Caché y versiones
+
+Los assets se cargan con `?v=` (cache-busting) y el pie de página muestra la
+etiqueta de versión del build: si cambias algo y no lo ves en línea, un
+`Ctrl+F5` descarta la copia guardada del navegador.
 
 ---
 
