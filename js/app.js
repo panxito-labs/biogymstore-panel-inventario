@@ -46,7 +46,7 @@ function statusBadge(p) {
 }
 
 function productThumb(p) {
-  if (/^https?:\/\//.test(p.imagen || "")) {
+  if (/^(https?:\/\/|data:image\/)/.test(p.imagen || "")) {
     return `<img src="${p.imagen}" alt="" class="thumb-img" loading="lazy">`;
   }
   if (typeof ICONS !== "undefined" && ICONS[p.icon]) {

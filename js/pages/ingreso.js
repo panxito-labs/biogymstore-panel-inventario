@@ -80,15 +80,107 @@ document.addEventListener("DOMContentLoaded", async () => {
     newCategory.appendChild(opt);
   });
 
-  /* ---- Vista previa de imagen ---- */
-  newImage.addEventListener("input", () => {
-    const url = newImage.value.trim();
-    if (/^https?:\/\//.test(url)) {
-      newPreview.innerHTML = `<img src="${url}" alt="" class="thumb-img">`;
+  /* ---- Imagen: modo URL o archivo subido ---- */
+  const imgModes = document.getElementById("imgModes");
+  const imgPanelUrl = document.getElementById("imgPanelUrl");
+  const imgPanelFile = document.getElementById("imgPanelFile");
+  const imgFile = document.getElementById("newImageFile");
+  const imgDrop = document.getElementById("imgDrop");
+  const imgDropText = document.getElementById("imgDropText");
+
+  let imgMode = "url";
+  let imgData = ""; /* data URL de la imagen subida (vacío si no hay) */
+
+  function renderPreview(src) {
+    if (/^(https?:\/\/|data:image\/)/.test(src)) {
+      newPreview.innerHTML = `<img src="${src}" alt="" class="thumb-img">`;
     } else {
       newPreview.innerHTML = icon("package");
     }
+  }
+
+  function setImgMode(mode) {
+    imgMode = mode;
+    imgModes.querySelectorAll("button").forEach((b) =>
+      b.classList.toggle("active", b.dataset.mode === mode)
+    );
+    imgPanelUrl.classList.toggle("d-none", mode !== "url");
+    imgPanelFile.classList.toggle("d-none", mode !== "file");
+    /* Al ocultar el input de URL se deshabilita para que su validación
+       (type=url) no bloquee el envío del formulario en modo archivo */
+    newImage.disabled = mode !== "url";
+    renderPreview(mode === "file" ? imgData : newImage.value.trim());
+  }
+
+  imgModes.addEventListener("click", (e) => {
+    const btn = e.target.closest("button[data-mode]");
+    if (btn) setImgMode(btn.dataset.mode);
   });
+
+  newImage.addEventListener("input", () => {
+    if (imgMode === "url") renderPreview(newImage.value.trim());
+  });
+
+  /* Redimensiona y comprime a 600 px antes de guardar (la imagen viaja en
+     base64 dentro de sessionStorage, hay que mantenerla liviana) */
+  function processImage(file) {
+    if (!file || !/^image\//.test(file.type)) {
+      toast("El archivo debe ser una imagen (JPG, PNG o WebP).", false);
+      return;
+    }
+    const reader = new FileReader();
+    reader.onerror = () => toast("No se pudo leer la imagen.", false);
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => toast("La imagen no es válida.", false);
+      img.onload = () => {
+        const MAX = 600;
+        const ratio = Math.min(1, MAX / Math.max(img.width, img.height));
+        const w = Math.round(img.width * ratio);
+        const h = Math.round(img.height * ratio);
+        const canvas = document.createElement("canvas");
+        canvas.width = w;
+        canvas.height = h;
+        canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+        /* PNG conserva transparencia; el resto va a JPEG para pesar menos */
+        const tieneAlfa = file.type === "image/png" || file.type === "image/webp";
+        imgData = canvas.toDataURL(tieneAlfa ? "image/png" : "image/jpeg", 0.82);
+        imgDrop.classList.add("has-file");
+        imgDropText.textContent = `${file.name} · ${w}×${h}px`;
+        renderPreview(imgData);
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  imgFile.addEventListener("change", () => processImage(imgFile.files[0]));
+
+  /* Arrastrar y soltar sobre la zona de la imagen */
+  ["dragenter", "dragover"].forEach((ev) =>
+    imgDrop.addEventListener(ev, (e) => {
+      e.preventDefault();
+      imgDrop.classList.add("dragover");
+    })
+  );
+  ["dragleave", "drop"].forEach((ev) =>
+    imgDrop.addEventListener(ev, (e) => {
+      e.preventDefault();
+      imgDrop.classList.remove("dragover");
+    })
+  );
+  imgDrop.addEventListener("drop", (e) => {
+    const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if (f) processImage(f);
+  });
+
+  function clearImage() {
+    imgData = "";
+    imgFile.value = "";
+    imgDrop.classList.remove("has-file");
+    imgDropText.textContent = "Haz clic o arrastra una imagen aquí";
+    renderPreview(imgMode === "file" ? "" : newImage.value.trim());
+  }
 
   /* ---- Crear producto nuevo ---- */
   newForm.addEventListener("submit", (e) => {
@@ -104,13 +196,16 @@ document.addEventListener("DOMContentLoaded", async () => {
       toast("Ingrese un precio válido.", false);
       return;
     }
+    const imagen = imgMode === "file"
+      ? imgData
+      : (/^https?:\/\//.test(newImage.value.trim()) ? newImage.value.trim() : "");
     const product = Store.addProduct({
       nombre: document.getElementById("newName").value,
       sku,
       categoria: newCategory.value,
       precio,
       descripcion: document.getElementById("newDesc").value,
-      imagen: newImage.value,
+      imagen,
       icon: "box",
       cajaUnits: document.getElementById("newBoxUnits").value,
       cantidad: document.getElementById("newQty").value,
@@ -118,7 +213,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
     toast(`Producto "${product.nombre}" agregado al catálogo.`);
     newForm.reset();
-    newPreview.innerHTML = icon("package");
+    clearImage();
+    setImgMode("url");
     fillProductSelect();
     fillWarehouseSelects();
   });
