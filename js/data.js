@@ -101,7 +101,7 @@ const SEED = {
 };
 
 async function loadSeedData() {
-  const res = await fetch("data/seed.json");
+  const res = await fetch("data/seed.json?v=20261118-1");
   if (!res.ok) throw new Error("HTTP " + res.status);
   return res.json();
 }

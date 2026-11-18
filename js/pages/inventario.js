@@ -11,20 +11,23 @@ document.addEventListener("DOMContentLoaded", async () => {
   const empty = document.getElementById("emptyState");
   const count = document.getElementById("resultCount");
 
-  /* ---- Ventana de detalle de producto ---- */
+  /* ---- Ventana de detalle de producto ---- (con guards: si la caché del
+     navegador sirve un HTML viejo, que falte un elemento no debe tumbar
+     el buscador ni la tabla) */
   const modalEl = document.getElementById("productModal");
   const filterEl = document.getElementById("pmFilter");
   const kpisEl = document.getElementById("pmKpis");
   const chartEl = document.getElementById("pmChart");
   const axisEl = document.getElementById("pmAxis");
   const noSalesEl = document.getElementById("pmNoSales");
+  const statsOk = !!(modalEl && filterEl && kpisEl && chartEl && axisEl && noSalesEl);
 
   let currentProduct = null;
   let currentPeriod = "mes";
 
   /* Estadística del producto según el periodo elegido */
   function renderStats() {
-    if (!currentProduct) return;
+    if (!currentProduct || !statsOk || typeof Store.statsFor !== "function") return;
     const s = Store.statsFor(currentProduct.id, currentPeriod);
 
     kpisEl.innerHTML = `
@@ -55,25 +58,30 @@ document.addEventListener("DOMContentLoaded", async () => {
     axisEl.classList.toggle("d-none", s.ventas === 0);
   }
 
-  filterEl.addEventListener("click", (e) => {
-    const btn = e.target.closest("button[data-period]");
-    if (!btn) return;
-    currentPeriod = btn.dataset.period;
-    filterEl.querySelectorAll("button").forEach((b) => b.classList.toggle("active", b === btn));
-    renderStats();
-  });
+  if (statsOk) {
+    filterEl.addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-period]");
+      if (!btn) return;
+      currentPeriod = btn.dataset.period;
+      filterEl.querySelectorAll("button").forEach((b) => b.classList.toggle("active", b === btn));
+      renderStats();
+    });
+  }
 
   function showDetail(id) {
     const p = Store.getProduct(id);
-    if (!p) return;
+    if (!p || !modalEl) return;
     currentProduct = p;
-    document.getElementById("pmSku").textContent = p.sku;
-    document.getElementById("pmName").textContent = p.nombre;
-    document.getElementById("pmCat").textContent = p.categoria;
-    document.getElementById("pmPrice").textContent = fmtCLP(p.precio);
-    document.getElementById("pmStatus").innerHTML = statusBadge(p);
-    document.getElementById("pmDesc").textContent = p.descripcion || "Sin descripción disponible.";
-    document.getElementById("pmPhoto").innerHTML = productThumb(p);
+    const set = (el, txt) => { const n = document.getElementById(el); if (n) n.textContent = txt; };
+    set("pmSku", p.sku);
+    set("pmName", p.nombre);
+    set("pmCat", p.categoria);
+    set("pmPrice", fmtCLP(p.precio));
+    const status = document.getElementById("pmStatus");
+    if (status) status.innerHTML = statusBadge(p);
+    set("pmDesc", p.descripcion || "Sin descripción disponible.");
+    const photo = document.getElementById("pmPhoto");
+    if (photo) photo.innerHTML = productThumb(p);
     renderStats();
 
     if (typeof bootstrap !== "undefined" && bootstrap.Modal) {
@@ -88,6 +96,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function hideDetail() {
+    if (!modalEl) return;
     if (typeof bootstrap !== "undefined" && bootstrap.Modal) {
       const inst = bootstrap.Modal.getInstance(modalEl);
       if (inst) inst.hide();
@@ -99,12 +108,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  modalEl.querySelectorAll("[data-bs-dismiss='modal']").forEach((b) =>
-    b.addEventListener("click", hideDetail)
-  );
-  modalEl.addEventListener("click", (e) => {
-    if (e.target === modalEl) hideDetail(); /* clic en el fondo cierra */
-  });
+  if (modalEl) {
+    modalEl.querySelectorAll("[data-bs-dismiss='modal']").forEach((b) =>
+      b.addEventListener("click", hideDetail)
+    );
+    modalEl.addEventListener("click", (e) => {
+      if (e.target === modalEl) hideDetail(); /* clic en el fondo cierra */
+    });
+  }
 
   /* Clic o Enter sobre una fila abre la ventana */
   body.addEventListener("click", (e) => {
