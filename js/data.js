@@ -83,6 +83,18 @@
     {
       id: 1, nombre: "Pesaschile", categoria: "BÃ¡sculas y pesaje deportivo",
       web: "https://www.pesaschile.cl", contacto: "Pedido bajo cotizaciÃ³n â€" Santiago"
+    },
+    {
+      id: 2, nombre: "Proveedor indumentaria", categoria: "Indumentaria deportiva",
+      web: "", contacto: "Sitio web por definir — Santiago"
+    },
+    {
+      id: 3, nombre: "Proveedor suplementos", categoria: "Suplementos y nutrición",
+      web: "", contacto: "Sitio web por definir — Santiago"
+    },
+    {
+      id: 4, nombre: "Proveedor equipamiento", categoria: "Equipamiento de gimnasio",
+      web: "", contacto: "Sitio web por definir — Santiago"
     }
   ],
   movements: []
