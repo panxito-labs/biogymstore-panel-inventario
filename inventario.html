@@ -7,8 +7,8 @@
   <meta name="referrer" content="no-referrer">
   <title>Inventario | BioGymStore</title>
   <link rel="icon" type="image/png" href="img/favicon.png">
-  <link href="vendor/css/bootstrap.min.css?v=20261120-1" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=20261120-1">
+  <link href="vendor/css/bootstrap.min.css?v=20261118-3" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css?v=20261118-3">
 </head>
 <body data-page="inventario">
 
@@ -81,7 +81,7 @@
     </section>
 
     <footer class="app-footer text-center mt-4">
-      BioGymStore — Sistema interno de gestión de stock · Uso exclusivo del personal autorizado &middot; <span class="build-tag" data-build="20261120-1">v20261120-1</span>
+      BioGymStore — Sistema interno de gestión de stock · Uso exclusivo del personal autorizado &middot; <span class="build-tag" data-build="20261118-3">v20261118-3</span>
     </footer>
   </main>
 
@@ -92,9 +92,12 @@
 
         <div class="modal-header">
           <span class="sku-code" id="pmSku">—</span>
-          <button type="button" class="pm-close" data-bs-dismiss="modal" aria-label="Cerrar ventana">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          </button>
+          <div class="pm-header-actions">
+            <button type="button" class="pm-edit" id="pmEditBtn">Editar</button>
+            <button type="button" class="pm-close" data-bs-dismiss="modal" aria-label="Cerrar ventana">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
         </div>
 
         <div class="modal-body">
@@ -137,11 +140,89 @@
     </div>
   </div>
 
-  <script src="vendor/js/bootstrap.bundle.min.js?v=20261120-1"></script>
-  <script src="js/data.js?v=20261120-1"></script>
-  <script src="js/store.js?v=20261120-1"></script>
-  <script src="js/icons.js?v=20261120-1"></script>
-  <script src="js/app.js?v=20261120-1"></script>
-  <script src="js/pages/inventario.js?v=20261120-1"></script>
+  <!-- VENTANA DE EDICIÓN DE PRODUCTO (RF-03) -->
+  <div class="modal fade product-modal" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <span class="sku-code" id="editSkuTag">—</span>
+          <div class="pm-header-actions">
+            <button type="button" class="pm-close" data-bs-dismiss="modal" aria-label="Cerrar ventana">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="modal-body">
+          <h2 class="pm-name mb-3" id="editTitle">Editar producto</h2>
+
+          <form id="editForm" class="needs-validation" novalidate>
+            <div class="mb-3">
+              <label for="epName" class="form-label">Nombre</label>
+              <input type="text" id="epName" class="form-control" required>
+              <div class="invalid-feedback">Ingresa el nombre del producto.</div>
+            </div>
+            <div class="row g-3 mb-3">
+              <div class="col-6">
+                <label for="epSku" class="form-label">SKU</label>
+                <input type="text" id="epSku" class="form-control" required>
+                <div class="invalid-feedback">Ingresa el SKU.</div>
+              </div>
+              <div class="col-6">
+                <label for="epCategory" class="form-label">Categoría</label>
+                <select id="epCategory" class="form-select" required></select>
+                <div class="invalid-feedback">Selecciona una categoría.</div>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label for="epPrice" class="form-label">Precio (CLP)</label>
+              <input type="number" id="epPrice" class="form-control" min="0" required>
+              <div class="invalid-feedback">Ingresa un precio válido.</div>
+            </div>
+            <div class="mb-3">
+              <label for="epDesc" class="form-label">Descripción</label>
+              <textarea id="epDesc" class="form-control" rows="2" placeholder="Breve descripción del producto"></textarea>
+            </div>
+
+            <div class="mb-2">
+              <label class="form-label" id="epImgModeLabel">Imagen</label>
+              <div class="img-modes" id="epModes" role="group" aria-labelledby="epImgModeLabel">
+                <button type="button" data-mode="url" class="active">URL</button>
+                <button type="button" data-mode="file">Archivo</button>
+              </div>
+              <div class="d-flex align-items-center gap-3 mt-2">
+                <span class="thumb thumb-preview" id="epPreview"></span>
+                <div class="flex-grow-1" style="min-width:0">
+                  <div id="epPanelUrl">
+                    <input type="url" id="epImage" class="form-control" placeholder="https://..." aria-label="URL de la imagen">
+                  </div>
+                  <div id="epPanelFile" class="d-none">
+                    <label class="img-drop" id="epDrop" for="epImageFile">
+                      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                      <span id="epDropText">Haz clic o arrastra una imagen aquí</span>
+                      <input type="file" id="epImageFile" accept="image/*" class="visually-hidden">
+                    </label>
+                    <div class="form-text text-secondary">JPG, PNG o WebP · se comprime a 600 px</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-accent w-100 mt-3">Guardar cambios</button>
+            <button type="button" class="btn btn-accent w-100 mt-2" id="editCancel">Cancelar</button>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="vendor/js/bootstrap.bundle.min.js?v=20261118-3"></script>
+  <script src="js/data.js?v=20261118-3"></script>
+  <script src="js/store.js?v=20261118-3"></script>
+  <script src="js/icons.js?v=20261118-3"></script>
+  <script src="js/app.js?v=20261118-3"></script>
+  <script src="js/pages/inventario.js?v=20261118-3"></script>
 </body>
 </html>

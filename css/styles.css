@@ -438,6 +438,19 @@ body.no-bs .list-group-item {
 .pm-close:hover { border-color: #ffe600; color: #ffe600; }
 .pm-close .icon { width: 15px; height: 15px; }
 
+/* Acciones del encabezado: botón Editar (amarillo) + cerrar */
+.pm-header-actions { display: inline-flex; align-items: center; gap: 8px; }
+.pm-edit {
+  display: inline-flex; align-items: center; justify-content: center;
+  height: 30px; padding: 0 14px;
+  background-color: #ffe600; border: none; border-radius: 8px;
+  color: #000000; font-family: inherit;
+  font-size: 13px; font-weight: 700; letter-spacing: normal;
+  cursor: pointer; transition: background-color .2s, transform .1s;
+}
+.pm-edit:hover { background-color: #e6cf00; color: #000; }
+.pm-edit:active { transform: translateY(1px); }
+
 /* Fila: foto + datos */
 .pm-head { display: flex; align-items: flex-start; gap: 14px; }
 .pm-photo {

@@ -134,6 +134,37 @@ const Store = (() => {
     return product;
   }
 
+  /* Edita la ficha de un producto (RF-03): nombre, SKU, categoría,
+     precio, descripción e imagen. No toca el stock ni genera movimiento. */
+  function updateProduct(id, data) {
+    const p = getProduct(id);
+    if (!p) return { ok: false, msg: "Producto no encontrado." };
+
+    const nombre = String(data.nombre || "").trim();
+    if (!nombre) return { ok: false, msg: "El nombre es obligatorio." };
+
+    const sku = String(data.sku || "").trim().toUpperCase();
+    if (!sku) return { ok: false, msg: "El SKU es obligatorio." };
+    if (db.products.some((x) => x.id !== p.id && x.sku.toUpperCase() === sku)) {
+      return { ok: false, msg: `El SKU ${sku} ya está en uso por otro producto.` };
+    }
+
+    const precio = Number(data.precio);
+    if (!Number.isFinite(precio) || precio < 0) {
+      return { ok: false, msg: "Ingrese un precio válido." };
+    }
+
+    p.nombre = nombre;
+    p.sku = sku;
+    if (data.categoria) p.categoria = data.categoria;
+    p.precio = Math.round(precio);
+    p.descripcion = String(data.descripcion || "").trim();
+    if (typeof data.imagen === "string") p.imagen = data.imagen.trim();
+
+    save();
+    return { ok: true, product: p };
+  }
+
   function addStock(id, cantidad, destino) {
     const p = getProduct(id);
     if (!p) return { ok: false, msg: "Producto no encontrado." };
@@ -343,7 +374,7 @@ const Store = (() => {
   return {
     init, login, logout, isLoggedIn, currentUser,
     getProducts, getProduct, getCategories, totalStock, isBajoPedido, statusOf,
-    skuExists, addProduct, addStock,
+    skuExists, addProduct, updateProduct, addStock,
     transfer,
     getWarehouses, addWarehouse, removeWarehouse,
     getMovements,

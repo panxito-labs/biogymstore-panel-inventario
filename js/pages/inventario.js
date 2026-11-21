@@ -117,6 +117,259 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
+  /* ---- Edición de producto (RF-03): botón amarillo junto a la X ---- */
+  const editModalEl = document.getElementById("editModal");
+  const editForm = document.getElementById("editForm");
+  const editBtn = document.getElementById("pmEditBtn");
+  const editCancel = document.getElementById("editCancel");
+  const ep = {
+    skuTag: document.getElementById("editSkuTag"),
+    name: document.getElementById("epName"),
+    sku: document.getElementById("epSku"),
+    cat: document.getElementById("epCategory"),
+    price: document.getElementById("epPrice"),
+    desc: document.getElementById("epDesc"),
+    modes: document.getElementById("epModes"),
+    panelUrl: document.getElementById("epPanelUrl"),
+    panelFile: document.getElementById("epPanelFile"),
+    url: document.getElementById("epImage"),
+    file: document.getElementById("epImageFile"),
+    drop: document.getElementById("epDrop"),
+    dropText: document.getElementById("epDropText"),
+    preview: document.getElementById("epPreview")
+  };
+  const editOk = !!(editModalEl && editForm && editBtn && ep.name &&
+                    typeof Store.updateProduct === "function");
+
+  let editImgMode = "url";
+  let editImgData = "";        /* imagen en modo archivo (data URL) */
+  let reopenDetail = false;    /* ¿volver al detalle al cerrar la edición? */
+  let pendingDetailId = null;
+
+  function epRenderPreview(src) {
+    if (/^(https?:\/\/|data:image\/)/.test(src)) {
+      ep.preview.innerHTML = `<img src="${src}" alt="" class="thumb-img">`;
+    } else {
+      ep.preview.innerHTML = icon("package");
+    }
+  }
+
+  function epSetMode(mode) {
+    editImgMode = mode;
+    ep.modes.querySelectorAll("button").forEach((b) =>
+      b.classList.toggle("active", b.dataset.mode === mode)
+    );
+    ep.panelUrl.classList.toggle("d-none", mode !== "url");
+    ep.panelFile.classList.toggle("d-none", mode !== "file");
+    /* Al ocultar el input de URL se deshabilita para que su validación
+       (type=url) no bloquee el envío del formulario en modo archivo */
+    ep.url.disabled = mode !== "url";
+    epRenderPreview(mode === "file" ? editImgData : ep.url.value.trim());
+  }
+
+  /* Redimensiona y comprime a 600 px (la imagen viaja en base64 en
+     sessionStorage, hay que mantenerla liviana) */
+  function epProcessImage(file) {
+    if (!file || !/^image\//.test(file.type)) {
+      toast("El archivo debe ser una imagen (JPG, PNG o WebP).", false);
+      return;
+    }
+    const reader = new FileReader();
+    reader.onerror = () => toast("No se pudo leer la imagen.", false);
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => toast("La imagen no es válida.", false);
+      img.onload = () => {
+        const MAX = 600;
+        const ratio = Math.min(1, MAX / Math.max(img.width, img.height));
+        const w = Math.round(img.width * ratio);
+        const h = Math.round(img.height * ratio);
+        const canvas = document.createElement("canvas");
+        canvas.width = w;
+        canvas.height = h;
+        canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+        const tieneAlfa = file.type === "image/png" || file.type === "image/webp";
+        editImgData = canvas.toDataURL(tieneAlfa ? "image/png" : "image/jpeg", 0.82);
+        ep.drop.classList.add("has-file");
+        ep.dropText.textContent = `${file.name} · ${w}×${h}px`;
+        epRenderPreview(editImgData);
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function showEditModal() {
+    if (typeof bootstrap !== "undefined" && bootstrap.Modal) {
+      bootstrap.Modal.getOrCreateInstance(editModalEl).show();
+    } else {
+      editModalEl.classList.add("show");
+      editModalEl.style.display = "block";
+      editModalEl.setAttribute("aria-hidden", "false");
+      document.body.classList.add("modal-open");
+    }
+  }
+
+  /* Bootstrap ignora hide()/show() mientras la ventana está en su fade
+     (~300 ms). Si el clic llega dentro de esa ventana, reintenta desde la
+     página hasta que la transición termine, para no perder el cambio. */
+  function cuandoQuieta(el, accion) {
+    const inst = (typeof bootstrap !== "undefined" && bootstrap.Modal && el)
+      ? bootstrap.Modal.getInstance(el) : null;
+    if (inst && inst._isTransitioning) {
+      setTimeout(() => cuandoQuieta(el, accion), 100);
+      return;
+    }
+    accion(inst);
+  }
+
+  function hideEdit() {
+    if (!editModalEl) return;
+    const doReopen = reopenDetail;
+    const id = pendingDetailId;
+    reopenDetail = false;
+    const finish = () => { if (doReopen && id != null) showDetail(id); };
+
+    if (typeof bootstrap === "undefined" || !bootstrap.Modal) {
+      editModalEl.classList.remove("show");
+      editModalEl.style.display = "none";
+      editModalEl.setAttribute("aria-hidden", "true");
+      document.body.classList.remove("modal-open");
+      finish();
+      return;
+    }
+    cuandoQuieta(editModalEl, (inst) => {
+      if (!editModalEl.classList.contains("show")) { finish(); return; }
+      editModalEl.addEventListener("hidden.bs.modal", function h() {
+        editModalEl.removeEventListener("hidden.bs.modal", h);
+        finish();
+      });
+      (inst || bootstrap.Modal.getOrCreateInstance(editModalEl)).hide();
+    });
+  }
+
+  /* Cambia detalle -> edición sin apilar ventanas */
+  function openEdit() {
+    if (!editOk || !currentProduct) return;
+    const p = currentProduct;
+    pendingDetailId = p.id;
+    reopenDetail = false;
+
+    ep.skuTag.textContent = p.sku;
+    ep.name.value = p.nombre;
+    ep.sku.value = p.sku;
+    ep.cat.value = p.categoria;
+    ep.price.value = p.precio;
+    ep.desc.value = p.descripcion || "";
+    editForm.classList.remove("was-validated");
+
+    editImgData = "";
+    ep.file.value = "";
+    ep.drop.classList.remove("has-file");
+    ep.dropText.textContent = "Haz clic o arrastra una imagen aquí";
+    if (/^https?:\/\//.test(p.imagen || "")) {
+      ep.url.value = p.imagen;
+      epSetMode("url");
+    } else if (/^data:image\//.test(p.imagen || "")) {
+      editImgData = p.imagen;
+      ep.url.value = "";
+      ep.drop.classList.add("has-file");
+      ep.dropText.textContent = "Imagen actual del producto";
+      epSetMode("file");
+    } else {
+      ep.url.value = "";
+      epSetMode("url");
+    }
+
+    if (typeof bootstrap === "undefined" || !bootstrap.Modal || !modalEl) {
+      hideDetail(); /* respaldo sin Bootstrap JS */
+      showEditModal();
+      return;
+    }
+    /* Cierra el detalle y abre la edición. Si el detalle aún está en su
+       fade, reintenta: un hide() dentro de la transición sería ignorado
+       y la ventana de edición quedaría sin abrir. */
+    cuandoQuieta(modalEl, (inst) => {
+      if (!modalEl.classList.contains("show")) { showEditModal(); return; }
+      modalEl.addEventListener("hidden.bs.modal", function h() {
+        modalEl.removeEventListener("hidden.bs.modal", h);
+        showEditModal();
+      });
+      (inst || bootstrap.Modal.getOrCreateInstance(modalEl)).hide();
+    });
+  }
+
+  if (editOk) {
+    Store.getCategories().forEach((c) => {
+      const opt = document.createElement("option");
+      opt.value = c;
+      opt.textContent = c;
+      ep.cat.appendChild(opt);
+    });
+
+    ep.modes.addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-mode]");
+      if (btn) epSetMode(btn.dataset.mode);
+    });
+    ep.url.addEventListener("input", () => {
+      if (editImgMode === "url") epRenderPreview(ep.url.value.trim());
+    });
+    ep.file.addEventListener("change", () => epProcessImage(ep.file.files[0]));
+    ["dragenter", "dragover"].forEach((ev) =>
+      ep.drop.addEventListener(ev, (e) => {
+        e.preventDefault();
+        ep.drop.classList.add("dragover");
+      })
+    );
+    ["dragleave", "drop"].forEach((ev) =>
+      ep.drop.addEventListener(ev, (e) => {
+        e.preventDefault();
+        ep.drop.classList.remove("dragover");
+      })
+    );
+    ep.drop.addEventListener("drop", (e) => {
+      const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+      if (f) epProcessImage(f);
+    });
+
+    editBtn.addEventListener("click", openEdit);
+
+    /* Cancelar vuelve al detalle; la X o el fondo cierran sin volver */
+    editCancel.addEventListener("click", () => {
+      reopenDetail = true;
+      hideEdit();
+    });
+
+    editModalEl.querySelectorAll("[data-bs-dismiss='modal']").forEach((b) =>
+      b.addEventListener("click", hideEdit)
+    );
+    editModalEl.addEventListener("click", (e) => {
+      if (e.target === editModalEl) hideEdit(); /* clic en el fondo cierra */
+    });
+
+    editForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      if (!editForm.checkValidity()) { editForm.classList.add("was-validated"); return; }
+      if (!currentProduct) return;
+      const imagen = editImgMode === "file"
+        ? editImgData
+        : (/^https?:\/\//.test(ep.url.value.trim()) ? ep.url.value.trim() : "");
+      const r = Store.updateProduct(currentProduct.id, {
+        nombre: ep.name.value,
+        sku: ep.sku.value,
+        categoria: ep.cat.value,
+        precio: ep.price.value,
+        descripcion: ep.desc.value,
+        imagen
+      });
+      if (!r.ok) { toast(r.msg, false); return; }
+      toast(`Producto "${r.product.nombre}" actualizado.`);
+      render();
+      reopenDetail = true; /* mostramos el detalle con los datos nuevos */
+      hideEdit();
+    });
+  }
+
   /* Clic o Enter sobre una fila abre la ventana */
   body.addEventListener("click", (e) => {
     const tr = e.target.closest("tr[data-id]");
