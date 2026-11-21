@@ -435,4 +435,44 @@ document.addEventListener("DOMContentLoaded", async () => {
   searchInput.addEventListener("input", render);
   categoryFilter.addEventListener("change", render);
   render();
+
+  /* ---- Exportación de reportes a Excel (RF-10) ---- */
+  function exportarInventario() {
+    if (typeof Excel === "undefined") { toast("Exportación no disponible.", false); return; }
+    const warehouses = Store.getWarehouses();
+    const encabezados = ["#", "SKU", "Producto", "Categoría", "Precio"]
+      .concat(warehouses, ["Total", "Estado"]);
+    const filas = Store.getProducts().map((p, i) => {
+      const meta = STATUS_META[Store.statusOf(p)];
+      const stockCols = warehouses.map((w) => (Store.isBajoPedido(p) ? "" : p.stock[w] || 0));
+      return [i + 1, p.sku, p.nombre, p.categoria, p.precio]
+        .concat(stockCols, [Store.isBajoPedido(p) ? "" : Store.totalStock(p), meta.label]);
+    });
+    Excel.descargar(`inventario-${Excel.fechaArchivo()}.xlsx`, "Inventario", encabezados, filas);
+    toast(`Inventario exportado: ${filas.length} productos.`);
+  }
+
+  function exportarHistorial() {
+    if (typeof Excel === "undefined") { toast("Exportación no disponible.", false); return; }
+    const movs = Store.getMovements();
+    if (!movs.length) { toast("No hay movimientos registrados.", false); return; }
+    const encabezados = ["#", "Fecha", "Producto", "Tipo", "Origen", "Destino", "Unidades", "Responsable"];
+    const filas = movs.map((m, i) => [
+      i + 1,
+      new Date(m.fecha).toLocaleString("es-CL"),
+      m.producto,
+      m.tipo,
+      m.origen || "—",
+      m.destino || "—",
+      m.unidades,
+      m.usuario || ""
+    ]);
+    Excel.descargar(`movimientos-${Excel.fechaArchivo()}.xlsx`, "Historial de movimientos", encabezados, filas);
+    toast(`Historial exportado: ${filas.length} movimientos.`);
+  }
+
+  const btnExportInv = document.getElementById("btnExportInv");
+  const btnExportHist = document.getElementById("btnExportHist");
+  if (btnExportInv) btnExportInv.addEventListener("click", exportarInventario);
+  if (btnExportHist) btnExportHist.addEventListener("click", exportarHistorial);
 });

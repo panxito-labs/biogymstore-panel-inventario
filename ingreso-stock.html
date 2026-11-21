@@ -7,8 +7,8 @@
   <meta name="referrer" content="no-referrer">
   <title>Ingresar Stock | BioGymStore</title>
   <link rel="icon" type="image/png" href="img/favicon.png">
-  <link href="vendor/css/bootstrap.min.css?v=20261118-3" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=20261118-3">
+  <link href="vendor/css/bootstrap.min.css?v=20261118-4" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css?v=20261118-4">
 </head>
 <body data-page="ingreso-stock">
 
@@ -50,11 +50,12 @@
 
     <div class="row g-4">
 
-      <!-- Ingreso a producto existente -->
+      <!-- Ingreso de stock en grupo (un solo formato, sirve para 1 o N productos) -->
       <section class="col-lg-6">
         <div class="card h-100">
-          <div class="card-header">Ingresar a producto existente</div>
+          <div class="card-header">Ingresar stock (en grupo)</div>
           <div class="card-body">
+            <p class="text-secondary small">Agrega uno o varios productos a la lista y regístralos todos de una vez.</p>
             <form id="restockForm" class="needs-validation" novalidate>
               <div class="mb-3">
                 <label for="restockProduct" class="form-label">Producto</label>
@@ -74,8 +75,28 @@
                   <div class="invalid-feedback">Selecciona un destino.</div>
                 </div>
               </div>
-              <button type="submit" class="btn btn-accent w-100 mt-4">Registrar ingreso</button>
+              <button type="submit" class="btn btn-accent w-100 mt-4">Agregar producto a la lista</button>
             </form>
+
+            <!-- Lista del ingreso en grupo (RF-05 / RF-10): siempre visible -->
+            <div id="ingresoLista" class="ingreso-lista mt-4">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="section-title">Lista del ingreso (<span id="listaCount">0</span>)</span>
+                <button type="button" class="btn-link" id="listaVaciar">Vaciar lista</button>
+              </div>
+              <div class="table-responsive">
+                <table class="table mb-0">
+                  <thead>
+                    <tr><th>#</th><th>Producto</th><th>Cantidad</th><th>Destino</th><th></th></tr>
+                  </thead>
+                  <tbody id="listaBody"></tbody>
+                </table>
+              </div>
+              <button type="button" class="btn btn-accent w-100 mt-3" id="btnRegistrarGrupo" disabled>Registrar ingreso (0)</button>
+              <p class="form-text text-secondary mt-2 mb-0">
+                Al registrar se descargará un Excel con todo lo ingresado, listo para adjuntarlo al correo.
+              </p>
+            </div>
           </div>
         </div>
       </section>
@@ -163,15 +184,16 @@
     </div>
 
     <footer class="app-footer text-center mt-4">
-      BioGymStore — Sistema interno de gestión de stock · Uso exclusivo del personal autorizado &middot; <span class="build-tag" data-build="20261118-3">v20261118-3</span>
+      BioGymStore — Sistema interno de gestión de stock · Uso exclusivo del personal autorizado &middot; <span class="build-tag" data-build="20261118-4">v20261118-4</span>
     </footer>
   </main>
 
-  <script src="vendor/js/bootstrap.bundle.min.js?v=20261118-3"></script>
-  <script src="js/data.js?v=20261118-3"></script>
-  <script src="js/store.js?v=20261118-3"></script>
-  <script src="js/icons.js?v=20261118-3"></script>
-  <script src="js/app.js?v=20261118-3"></script>
-  <script src="js/pages/ingreso.js?v=20261118-3"></script>
+  <script src="vendor/js/bootstrap.bundle.min.js?v=20261118-4"></script>
+  <script src="js/data.js?v=20261118-4"></script>
+  <script src="js/store.js?v=20261118-4"></script>
+  <script src="js/icons.js?v=20261118-4"></script>
+  <script src="js/app.js?v=20261118-4"></script>
+  <script src="js/excel.js?v=20261118-4"></script>
+  <script src="js/pages/ingreso.js?v=20261118-4"></script>
 </body>
 </html>

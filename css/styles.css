@@ -540,5 +540,17 @@ body.no-bs .list-group-item {
   border-radius: 8px; padding: 10px; text-align: center;
 }
 
+/* Lista de ingreso en grupo (varios productos de una vez) */
+.ingreso-lista { border-top: 1px solid #262626; padding-top: 14px; }
+.ingreso-lista .table td { padding: 8px 10px; vertical-align: middle; }
+.ingreso-lista .lista-qty { min-width: 74px; }
+.ingreso-lista .lista-del { width: 26px; height: 26px; border-radius: 6px; font-size: 14px; }
+.btn-link {
+  background: none; border: none; padding: 0;
+  color: #888888; font-size: 12px; font-weight: 600;
+  text-decoration: underline; cursor: pointer;
+}
+.btn-link:hover { color: #ffe600; }
+
 
 

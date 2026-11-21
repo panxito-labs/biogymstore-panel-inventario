@@ -61,16 +61,151 @@ document.addEventListener("DOMContentLoaded", async () => {
   restockProduct.addEventListener("change", updateCajas);
   restockQty.addEventListener("input", updateCajas);
 
+  /* ---- Ingreso en grupo: lista editable + registro de todo junto ---- */
+  const listaWrap = document.getElementById("ingresoLista");
+  const listaBody = document.getElementById("listaBody");
+  const listaCount = document.getElementById("listaCount");
+  const btnRegistrar = document.getElementById("btnRegistrarGrupo");
+  const btnVaciar = document.getElementById("listaVaciar");
+  const listaOk = !!(listaWrap && listaBody && btnRegistrar);
+  let lista = []; /* [{ pid, qty, destino }] */
+
+  function renderLista() {
+    if (!listaOk) return;
+    listaCount.textContent = lista.length;
+    btnRegistrar.textContent = `Registrar ingreso (${lista.length})`;
+    btnRegistrar.disabled = lista.length === 0;
+
+    if (!lista.length) {
+      listaBody.innerHTML =
+        `<tr><td colspan="5" class="text-center text-secondary small py-3">` +
+        `Aún no hay productos. Agrega el primero con el formulario de arriba ` +
+        `(aunque sea uno solo, queda en esta lista).</td></tr>`;
+      return;
+    }
+
+    const bodegaOpts = (sel) =>
+      Store.getWarehouses()
+        .map((w) => `<option value="${w}"${w === sel ? " selected" : ""}>${w}</option>`)
+        .join("");
+
+    listaBody.innerHTML = lista
+      .map((it, i) => {
+        const p = Store.getProduct(it.pid);
+        return `<tr data-i="${i}">
+          <td>${i + 1}</td>
+          <td>
+            <strong>${p ? p.sku : "?"}</strong>
+            <div class="text-secondary small">${p ? p.nombre : "Producto eliminado"}</div>
+          </td>
+          <td><input type="number" class="form-control form-control-sm lista-qty" min="1" value="${it.qty}" aria-label="Cantidad del producto ${i + 1}"></td>
+          <td><select class="form-select form-select-sm lista-dest" aria-label="Destino del producto ${i + 1}">${bodegaOpts(it.destino)}</select></td>
+          <td class="text-end">
+            <button type="button" class="pm-close lista-del" aria-label="Quitar de la lista">&times;</button>
+          </td>
+        </tr>`;
+      })
+      .join("");
+  }
+
   restockForm.addEventListener("submit", (e) => {
     e.preventDefault();
     if (!restockForm.checkValidity()) { restockForm.classList.add("was-validated"); return; }
-    const res = Store.addStock(restockProduct.value, restockQty.value, restockDest.value);
-    toast(res.msg, res.ok);
-    if (res.ok) {
+    if (!listaOk) return;
+    const pid = Number(restockProduct.value);
+    const qty = Number(restockQty.value);
+    const destino = restockDest.value;
+    const p = Store.getProduct(pid);
+    if (!p || !(qty > 0)) return;
+    lista.push({ pid, qty, destino });
+    renderLista();
+    toast(`"${p.nombre}" agregado a la lista (${lista.length} en el ingreso).`);
+    restockQty.value = 1;
+    restockForm.classList.remove("was-validated");
+    updateCajas();
+  });
+
+  if (listaOk) {
+    /* Cantidades y destinos se editan dentro de la tabla */
+    listaBody.addEventListener("input", (e) => {
+      const tr = e.target.closest("tr[data-i]");
+      if (!tr) return;
+      const it = lista[Number(tr.dataset.i)];
+      if (!it) return;
+      if (e.target.classList.contains("lista-qty")) it.qty = Number(e.target.value);
+      if (e.target.classList.contains("lista-dest")) it.destino = e.target.value;
+    });
+
+    /* Quitar un producto de la lista */
+    listaBody.addEventListener("click", (e) => {
+      const del = e.target.closest(".lista-del");
+      if (!del) return;
+      const tr = del.closest("tr[data-i]");
+      if (!tr) return;
+      lista.splice(Number(tr.dataset.i), 1);
+      renderLista();
+    });
+
+    btnVaciar.addEventListener("click", () => {
+      lista = [];
+      renderLista();
+      toast("Lista vaciada.");
+    });
+
+    /* Registra todo el grupo de una vez y descarga el Excel (RF-10) */
+    btnRegistrar.addEventListener("click", () => {
+      if (!lista.length) return;
+
+      /* Validar todo antes de tocar el stock */
+      for (const it of lista) {
+        const p = Store.getProduct(it.pid);
+        if (!p) { toast("Hay un producto de la lista que ya no existe.", false); return; }
+        if (!(Number(it.qty) > 0)) { toast(`Cantidad inválida para ${p.sku}.`, false); return; }
+        if (!it.destino) { toast(`Falta el destino de ${p.sku}.`, false); return; }
+      }
+
+      /* Registrar (addStock descuenta/suma y deja el movimiento) */
+      const registrados = [];
+      for (const it of lista) {
+        const p = Store.getProduct(it.pid);
+        const res = Store.addStock(p.id, Number(it.qty), it.destino);
+        if (!res.ok) { toast(res.msg, false); break; }
+        registrados.push({ p, qty: Number(it.qty), destino: it.destino });
+      }
+      if (!registrados.length) return;
+
+      /* Excel con todo lo ingresado, listo para adjuntar al correo */
+      try {
+        const ahora = new Date();
+        const fechaTxt = ahora.toLocaleString("es-CL");
+        const usuario = (Store.currentUser() || {}).nombre || "";
+        const filas = registrados.map((it, i) => [
+          i + 1, it.p.sku, it.p.nombre, it.qty, it.destino,
+          it.p.precio, it.p.precio * it.qty, fechaTxt, usuario
+        ]);
+        const total = registrados.reduce((s, it) => s + it.p.precio * it.qty, 0);
+        filas.push(["", "", "", "", "", "TOTAL", total, "", ""]);
+        Excel.descargar(
+          `ingreso-${Excel.fechaArchivo(ahora)}.xlsx`,
+          "Ingreso de stock",
+          ["#", "SKU", "Producto", "Cantidad", "Bodega destino", "Precio unitario", "Valor total", "Fecha", "Responsable"],
+          filas
+        );
+      } catch (err) {
+        console.warn("No se pudo generar el Excel:", err);
+      }
+
+      const n = registrados.length;
+      toast(`Ingreso registrado: ${n} producto${n === 1 ? "" : "s"}. Excel descargado — adjúntalo a tu correo.`);
+      lista = [];
+      renderLista();
       restockQty.value = 1;
       fillProductSelect();
-    }
-  });
+    });
+  }
+
+  /* Estado inicial de la lista (siempre visible, aunque esté vacía) */
+  if (listaOk) renderLista();
 
   /* ---- Categorías del catálogo ---- */
   Store.getCategories().forEach((c) => {
