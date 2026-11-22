@@ -7,18 +7,18 @@
     iniciales: "UD"
   },
   warehouses: ["Bodega Tienda", "Bodega Casa Jefe"],
-  categories: ["Suplementos", "Pesas", "Indumentaria", "Accesorios", "NutriciÃ³n", "Barritas"],
+  categories: ["Suplementos", "Pesas", "Indumentaria", "Accesorios", "Nutrición", "Barritas"],
   products: [
     {
       id: 1, sku: "BG-SUP-001", nombre: "Iso 100 1.6 lb Fruity Pebbles - Dymatize Nutrition - Proteina Isolatada", categoria: "Suplementos",
-      precio: 34990, descripcion: "ProteÃ­na aislada Dymatize ISO 100, sabor Fruity Pebbles, formato 1.6 lb.",
+      precio: 34990, descripcion: "Proteína aislada Dymatize ISO 100, sabor Fruity Pebbles, formato 1.6 lb.",
       imagen: "https://cdn.shopify.com/s/files/1/0545/6435/6267/files/176585-1600-auto.webp?v=1794868917",
       icon: "zap", cajaUnits: 0,
       stock: { "Bodega Tienda": 45, "Bodega Casa Jefe": 10 }
     },
     {
       id: 2, sku: "BG-SUP-002", nombre: "WHEY BLEND PROTEIN STRONGEST 2KG", categoria: "Suplementos",
-      precio: 29990, descripcion: "Whey proteÃ­na concentrada Strongest, sabor chocolate, formato 2 kg.",
+      precio: 29990, descripcion: "Whey proteína concentrada Strongest, sabor chocolate, formato 2 kg.",
       imagen: "https://cdn.shopify.com/s/files/1/0545/6435/6267/files/chocolate2kg.jpg?v=1749940137",
       icon: "zap", cajaUnits: 0,
       stock: { "Bodega Tienda": 2, "Bodega Casa Jefe": 8 }
@@ -31,8 +31,8 @@
       stock: { "Bodega Tienda": 0, "Bodega Casa Jefe": 6 }
     },
     {
-      id: 4, sku: "BG-SUP-020", nombre: "CafeÃ­na 200mg (60 cÃ¡ps.)", categoria: "Suplementos",
-      precio: 9990, descripcion: "Suplemento de cafeÃ­na anhidra, 60 cÃ¡psulas.",
+      id: 4, sku: "BG-SUP-020", nombre: "Cafeína 200mg (60 cáps.)", categoria: "Suplementos",
+      precio: 9990, descripcion: "Suplemento de cafeína anhidra, 60 cápsulas.",
       imagen: "https://cdn.shopify.com/s/files/1/0545/6435/6267/files/productosextremosur-37.webp?v=1763840414",
       icon: "coffee", cajaUnits: 0,
       stock: { "Bodega Tienda": 3, "Bodega Casa Jefe": 0 }
@@ -45,15 +45,15 @@
       stock: { "Bodega Tienda": 4, "Bodega Casa Jefe": 0 }
     },
     {
-      id: 6, sku: "BG-EQU-050", nombre: "Barra OlÃ­mpica 20kg", categoria: "Pesas",
-      precio: 79990, descripcion: "Barra olÃ­mpica de 20 kg, 220 cm.",
+      id: 6, sku: "BG-EQU-050", nombre: "Barra Olímpica 20kg", categoria: "Pesas",
+      precio: 79990, descripcion: "Barra olímpica de 20 kg, 220 cm.",
       imagen: "https://cdn.shopify.com/s/files/1/0545/6435/6267/files/barra-olimpica-power-bar-20kg-kong.jpg?v=1744489071",
       icon: "dumbbell", cajaUnits: 0,
       stock: { "Bodega Tienda": 6, "Bodega Casa Jefe": 2 }
     },
     {
       id: 7, sku: "BG-IND-030", nombre: "POLERA DRY MULTIPROPOSITO OLYMPHUS", categoria: "Indumentaria",
-      precio: 9990, descripcion: "Polera deportiva dry multipropÃ³sito OLYMPHUS, transpirable.",
+      precio: 9990, descripcion: "Polera deportiva dry multipropósito OLYMPHUS, transpirable.",
       imagen: "https://cdn.shopify.com/s/files/1/0545/6435/6267/files/polera-dry-verde-1000x1000.jpg?v=1729702188",
       icon: "tag", cajaUnits: 0,
       stock: { "Bodega Tienda": 15, "Bodega Casa Jefe": 5 }
@@ -73,16 +73,16 @@
       stock: { "Bodega Tienda": 12, "Bodega Casa Jefe": 4 }
     },
     {
-      id: 10, sku: "BG-PED-001", nombre: "BÃ¡scula Deportiva Digital", categoria: "Accesorios",
-      precio: 24990, descripcion: "BÃ¡scula digital de precisiÃ³n. Sin stock propio: se pide a proveedor.",
+      id: 10, sku: "BG-PED-001", nombre: "Báscula Deportiva Digital", categoria: "Accesorios",
+      precio: 24990, descripcion: "Báscula digital de precisión. Sin stock propio: se pide a proveedor.",
       icon: "truck", cajaUnits: 0, bajoPedido: "Pesaschile",
       stock: {}
     }
   ],
   suppliers: [
     {
-      id: 1, nombre: "Pesaschile", categoria: "BÃ¡sculas y pesaje deportivo",
-      web: "https://www.pesaschile.cl", contacto: "Pedido bajo cotizaciÃ³n â€" Santiago"
+      id: 1, nombre: "Pesaschile", categoria: "Básculas y pesaje deportivo",
+      web: "https://www.pesaschile.cl", contacto: "Pedido bajo cotización — Santiago"
     },
     {
       id: 2, nombre: "Proveedor indumentaria", categoria: "Indumentaria deportiva",
@@ -101,7 +101,7 @@
 };
 
 async function loadSeedData() {
-  const res = await fetch("data/seed.json?v=20261120-1");
+  const res = await fetch("data/seed.json?v=20261121-1");
   if (!res.ok) throw new Error("HTTP " + res.status);
   return res.json();
 }
