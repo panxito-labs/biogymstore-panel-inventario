@@ -94,7 +94,19 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
     await Store.init();
+    // Sesión inválida (usuario eliminado o desactivado) → volver al login
+    if (!Store.currentUser()) {
+      Store.logout();
+      window.location.replace("index.html");
+      return;
+    }
+    // RF-02: Traslado es exclusivo del jefe/administrador
+    if (page === "traslado" && !Store.isAdmin()) {
+      window.location.replace("dashboard.html");
+      return;
+    }
     renderUser();
+    aplicarPermisos();
   } else if (Store.isLoggedIn()) {
     // Con sesión iniciada, el login redirige al dashboard
     window.location.replace("dashboard.html");
@@ -129,8 +141,41 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 function renderUser() {
   const u = Store.currentUser();
+  if (!u) return;
+  const rolTxt = u.rol === "admin" ? "Jefe / Administrador" : "Vendedor";
   document.querySelectorAll(".js-user-name").forEach((e) => (e.textContent = u.nombre));
-  document.querySelectorAll(".js-user-role").forEach((e) => (e.textContent = u.rol));
+  document.querySelectorAll(".js-user-role").forEach((e) => (e.textContent = rolTxt));
   document.querySelectorAll(".js-user-initials").forEach((e) => (e.textContent = u.iniciales));
+}
+
+/* RF-02: oculta opciones según el rol y deja el badge de usuario como acceso
+   a la gestión de usuarios (solo administrador) o al perfil propio (vendedor) */
+function aplicarPermisos() {
+  const admin = Store.isAdmin();
+
+  // El enlace "Traslado" solo se muestra al jefe
+  document.querySelectorAll('#mainNav a[href="traslado.html"]').forEach((a) => {
+    const li = a.closest("li") || a;
+    li.classList.toggle("d-none", !admin);
+  });
+
+  // Exportar a Excel (RF-10) es solo del administrador
+  if (!admin) {
+    const btnInv = document.getElementById("btnExportInv");
+    const btnHist = document.getElementById("btnExportHist");
+    if (btnInv && btnInv.parentElement) btnInv.parentElement.classList.add("d-none");
+    else if (btnInv) btnInv.classList.add("d-none");
+    if (btnHist) btnHist.classList.add("d-none");
+  }
+
+  // Badge de usuario: clicable para abrir gestión de usuarios / perfil
+  document.querySelectorAll(".user-badge").forEach((badge) => {
+    badge.classList.add("user-badge-clickable");
+    badge.setAttribute("title", admin ? "Gestionar usuarios" : "Ver mi perfil");
+    badge.addEventListener("click", (e) => {
+      if (e.target.closest("#btnLogout")) return; // el botón de salir tiene su acción
+      if (typeof window.abrirGestorUsuarios === "function") window.abrirGestorUsuarios();
+    });
+  });
 }
 

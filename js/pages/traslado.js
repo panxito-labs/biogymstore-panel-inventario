@@ -1,8 +1,14 @@
-/* Página: traslado.html — traslado entre bodegas, gestión de bodegas e historial */
+/* Página: traslado.html — traslado entre bodegas y gestión de bodegas (solo jefe) */
 
 document.addEventListener("DOMContentLoaded", async () => {
   if (document.body.dataset.page !== "traslado" || !Store.isLoggedIn()) return;
   await Store.init();
+
+  /* RF-02: el traslado es exclusivo del jefe/administrador */
+  if (!Store.isAdmin()) {
+    window.location.replace("dashboard.html");
+    return;
+  }
 
   const form = document.getElementById("transferForm");
   const prodSel = document.getElementById("transferProduct");
@@ -65,7 +71,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (res.ok) {
       qtyInput.value = 1;
       fillProducts();
-      renderMovements();
     }
   });
 
@@ -86,7 +91,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (res.ok) {
           fillWarehouseSelects();
           fillProducts();
-          renderMovements();
         }
       });
     });
@@ -104,24 +108,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  /* ---- Historial de movimientos ---- */
-  function renderMovements() {
-    const tbody = document.getElementById("movementsBody");
-    const movs = Store.getMovements();
-    tbody.innerHTML = movs.length
-      ? movs.map((m) => `
-          <tr>
-            <td class="text-secondary">${fechaCorta(m.fecha)}</td>
-            <td>${m.producto}</td>
-            <td><span class="badge ${m.tipo === "traslado" ? "badge-soft-warning" : "badge-soft-success"}">${m.tipo === "traslado" ? "Traslado" : "Ingreso"}</span></td>
-            <td class="text-secondary">${m.origen} -&gt; ${m.destino}</td>
-            <td class="text-end fw-bold">${m.unidades}</td>
-            <td class="text-secondary">${m.usuario}</td>
-          </tr>`).join("")
-      : `<tr><td colspan="6" class="text-center text-secondary py-3">Aún no hay movimientos registrados.</td></tr>`;
-  }
+  /* ---- Historial de movimientos: ahora vive en inventario.html (RF-09) ---- */
 
   fillProducts();
   fillWarehouseSelects();
-  renderMovements();
 });

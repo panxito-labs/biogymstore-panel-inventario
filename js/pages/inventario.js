@@ -436,8 +436,28 @@ document.addEventListener("DOMContentLoaded", async () => {
   categoryFilter.addEventListener("change", render);
   render();
 
-  /* ---- Exportación de reportes a Excel (RF-10) ---- */
+  /* ---- Historial de movimientos (RF-09) ---- */
+  function renderMovements() {
+    const tbody = document.getElementById("movementsBody");
+    if (!tbody) return;
+    const movs = Store.getMovements();
+    tbody.innerHTML = movs.length
+      ? movs.map((m) => `
+          <tr>
+            <td class="text-secondary">${fechaCorta(m.fecha)}</td>
+            <td>${m.producto}</td>
+            <td><span class="badge ${m.tipo === "traslado" ? "badge-soft-warning" : "badge-soft-success"}">${m.tipo === "traslado" ? "Traslado" : "Ingreso"}</span></td>
+            <td class="text-secondary">${m.origen} -&gt; ${m.destino}</td>
+            <td class="text-end fw-bold">${m.unidades}</td>
+            <td class="text-secondary">${m.usuario}</td>
+          </tr>`).join("")
+      : `<tr><td colspan="6" class="text-center text-secondary py-3">Aún no hay movimientos registrados.</td></tr>`;
+  }
+  renderMovements();
+
+  /* ---- Exportación de reportes a Excel (RF-10, solo administrador) ---- */
   function exportarInventario() {
+    if (!Store.isAdmin()) { toast("Solo el administrador puede exportar reportes.", false); return; }
     if (typeof Excel === "undefined") { toast("Exportación no disponible.", false); return; }
     const warehouses = Store.getWarehouses();
     const encabezados = ["#", "SKU", "Producto", "Categoría", "Precio"]
@@ -453,6 +473,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function exportarHistorial() {
+    if (!Store.isAdmin()) { toast("Solo el administrador puede exportar reportes.", false); return; }
     if (typeof Excel === "undefined") { toast("Exportación no disponible.", false); return; }
     const movs = Store.getMovements();
     if (!movs.length) { toast("No hay movimientos registrados.", false); return; }

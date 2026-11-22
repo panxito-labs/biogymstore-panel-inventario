@@ -23,6 +23,7 @@ const Store = (() => {
     if (cached) {
       db = cached;
       ensureSales();
+      ensureUsers();
       return;
     }
     try {
@@ -31,12 +32,13 @@ const Store = (() => {
       db = clone(SEED);
     }
     ensureSales();
+    ensureUsers();
     save();
   }
 
   function init() {
     if (!ready) {
-      ready = load().catch(() => { db = clone(SEED); ensureSales(); });
+      ready = load().catch(() => { db = clone(SEED); ensureSales(); ensureUsers(); });
     }
     return ready;
   }
@@ -47,19 +49,41 @@ const Store = (() => {
 
   init();
 
-  /* ---------- Sesión ---------- */
+  /* ---------- Sesión y usuarios (RF-01 / RF-02) ---------- */
 
-  function login(email, password) {
-    const u = db.user;
-    if (
-      typeof email === "string" &&
-      email.trim().toLowerCase() === u.email.toLowerCase() &&
-      password === u.password
-    ) {
-      storage.setItem(SESSION_KEY, "true");
-      return true;
+  /* Migración: bases antiguas solo tenían db.user (un único administrador) */
+  function ensureUsers() {
+    if (!Array.isArray(db.users) || !db.users.length) {
+      const legado = db.user || {};
+      db.users = [
+        { id: 1, email: legado.email || "demo@biogym.cl", password: legado.password || "demo1234",
+          nombre: legado.nombre || "Usuario Demo", rol: "admin",
+          iniciales: legado.iniciales || "UD", activo: true }
+      ];
+      save();
     }
-    return false;
+  }
+
+  /* Sesión: guarda el id del usuario (los valores antiguos "true" = admin) */
+  function login(email, password) {
+    ensureUsers();
+    if (typeof email !== "string") return false;
+    const key = email.trim().toLowerCase();
+    const u = db.users.find((x) => x.email.toLowerCase() === key && x.password === password);
+    if (!u) return false;
+    if (u.activo === false) {
+      loginError = "La cuenta está desactivada. Contacta al administrador.";
+      return false;
+    }
+    loginError = "";
+    storage.setItem(SESSION_KEY, String(u.id));
+    return true;
+  }
+
+  let loginError = "";
+
+  function loginMensaje() {
+    return loginError || "Usuario o contraseña incorrectos.";
   }
 
   function logout() {
@@ -67,11 +91,117 @@ const Store = (() => {
   }
 
   function isLoggedIn() {
-    return storage.getItem(SESSION_KEY) === "true";
+    const v = storage.getItem(SESSION_KEY);
+    return v === "true" || (v !== null && v !== "" && !isNaN(Number(v)));
   }
 
   function currentUser() {
-    return db.user;
+    if (!isLoggedIn()) return null;
+    ensureUsers();
+    const raw = storage.getItem(SESSION_KEY);
+    /* Sesión antigua ("true") = administrador */
+    if (raw === "true") return db.users.find((u) => u.rol === "admin") || db.users[0];
+    const u = db.users.find((x) => String(x.id) === raw);
+    if (!u) { logout(); return null; }
+    if (u.activo === false) { logout(); return null; }
+    return u;
+  }
+
+  function isAdmin() {
+    const u = currentUser();
+    return !!u && u.rol === "admin";
+  }
+
+  /* ---- CRUD de usuarios (solo administrador) ---- */
+
+  function getUsers() {
+    ensureUsers();
+    if (!isAdmin()) return []; /* solo el administrador ve las cuentas */
+    /* Nunca exponer la contraseña al listado */
+    return db.users.map((u) => ({
+      id: u.id, email: u.email, nombre: u.nombre,
+      rol: u.rol, iniciales: u.iniciales, activo: u.activo !== false
+    }));
+  }
+
+  function crearUsuario(data) {
+    if (!isAdmin()) return { ok: false, msg: "Solo el administrador puede crear usuarios." };
+    ensureUsers();
+    const nombre = String(data.nombre || "").trim();
+    const email = String(data.email || "").trim().toLowerCase();
+    const password = String(data.password || "");
+    const rol = data.rol === "vendedor" ? "vendedor" : "admin";
+    if (!nombre) return { ok: false, msg: "Ingresa el nombre del usuario." };
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { ok: false, msg: "Ingresa un correo válido." };
+    if (password.length < 6) return { ok: false, msg: "La contraseña debe tener al menos 6 caracteres." };
+    if (db.users.some((u) => u.email.toLowerCase() === email)) {
+      return { ok: false, msg: `El correo ${email} ya está registrado.` };
+    }
+    const id = db.users.reduce((m, u) => Math.max(m, Number(u.id) || 0), 0) + 1;
+    const iniciales = nombre.split(/\s+/).slice(0, 2).map((p) => p[0]).join("").toUpperCase();
+    db.users.push({ id, email, password, nombre, rol, iniciales, activo: true });
+    save();
+    return { ok: true, msg: `Usuario "${nombre}" creado correctamente.` };
+  }
+
+  function editarUsuario(id, data) {
+    if (!isAdmin()) return { ok: false, msg: "Solo el administrador puede editar usuarios." };
+    ensureUsers();
+    const u = db.users.find((x) => String(x.id) === String(id));
+    if (!u) return { ok: false, msg: "Usuario no encontrado." };
+    const nombre = String(data.nombre || "").trim();
+    const email = String(data.email || "").trim().toLowerCase();
+    const rol = data.rol === "vendedor" ? "vendedor" : "admin";
+    if (!nombre) return { ok: false, msg: "Ingresa el nombre del usuario." };
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { ok: false, msg: "Ingresa un correo válido." };
+    if (db.users.some((x) => x.id !== u.id && x.email.toLowerCase() === email)) {
+      return { ok: false, msg: `El correo ${email} ya está registrado.` };
+    }
+    /* No permitir degradar al último administrador activo */
+    if (u.rol === "admin" && rol !== "admin" && esUnicoAdminActivo(u.id)) {
+      return { ok: false, msg: "Debe existir al menos un administrador activo." };
+    }
+    u.nombre = nombre;
+    u.email = email;
+    u.rol = rol;
+    u.iniciales = nombre.split(/\s+/).slice(0, 2).map((p) => p[0]).join("").toUpperCase();
+    save();
+    return { ok: true, msg: `Usuario "${nombre}" actualizado.` };
+  }
+
+  function esUnicoAdminActivo(exceptoId) {
+    return !db.users.some((u) => u.id !== exceptoId && u.rol === "admin" && u.activo !== false);
+  }
+
+  function restablecerPassword(id, nueva) {
+    if (!isAdmin()) return { ok: false, msg: "Solo el administrador puede restablecer contraseñas." };
+    ensureUsers();
+    const u = db.users.find((x) => String(x.id) === String(id));
+    if (!u) return { ok: false, msg: "Usuario no encontrado." };
+    nueva = String(nueva || "");
+    if (nueva.length < 6) return { ok: false, msg: "La contraseña debe tener al menos 6 caracteres." };
+    u.password = nueva;
+    save();
+    return { ok: true, msg: `Contraseña de "${u.nombre}" restablecida.` };
+  }
+
+  function cambiarEstadoUsuario(id, activo) {
+    if (!isAdmin()) return { ok: false, msg: "Solo el administrador puede desactivar cuentas." };
+    ensureUsers();
+    const u = db.users.find((x) => String(x.id) === String(id));
+    if (!u) return { ok: false, msg: "Usuario no encontrado." };
+    const yo = currentUser();
+    if (yo && yo.id === u.id && !activo) {
+      return { ok: false, msg: "No puedes desactivar tu propia cuenta." };
+    }
+    if (!activo && u.rol === "admin" && esUnicoAdminActivo(u.id)) {
+      return { ok: false, msg: "Debe existir al menos un administrador activo." };
+    }
+    u.activo = !!activo;
+    save();
+    return { ok: true, msg: activo
+      ? `Cuenta de "${u.nombre}" reactivada.`
+      : `Cuenta de "${u.nombre}" desactivada.` };
   }
 
   /* ---------- Productos ---------- */
@@ -179,6 +309,7 @@ const Store = (() => {
   /* ---------- Traslados ---------- */
 
   function transfer(id, from, to, cantidad) {
+    if (!isAdmin()) return { ok: false, msg: "Solo el jefe puede trasladar stock." };
     const p = getProduct(id);
     if (!p) return { ok: false, msg: "Producto no encontrado." };
     cantidad = Number(cantidad);
@@ -202,6 +333,7 @@ const Store = (() => {
   }
 
   function addWarehouse(name) {
+    if (!isAdmin()) return { ok: false, msg: "Solo el jefe puede gestionar bodegas." };
     name = String(name || "").trim();
     if (!name) return { ok: false, msg: "Ingrese un nombre para la bodega." };
     if (db.warehouses.some((w) => w.toLowerCase() === name.toLowerCase())) {
@@ -216,6 +348,7 @@ const Store = (() => {
   }
 
   function removeWarehouse(name) {
+    if (!isAdmin()) return { ok: false, msg: "Solo el jefe puede gestionar bodegas." };
     if (db.warehouses.length <= 1) {
       return { ok: false, msg: "Debe existir al menos una bodega." };
     }
@@ -230,6 +363,7 @@ const Store = (() => {
   /* ---------- Movimientos (historial) ---------- */
 
   function addMovement(producto, tipo, origen, destino, unidades) {
+    const autor = currentUser();
     db.movements.unshift({
       id: Date.now() + Math.random(),
       fecha: new Date().toISOString(),
@@ -238,7 +372,7 @@ const Store = (() => {
       origen,
       destino,
       unidades: Number(unidades),
-      usuario: db.user.nombre
+      usuario: autor ? autor.nombre : "Sistema"
     });
     if (db.movements.length > 50) db.movements.pop();
   }
@@ -372,7 +506,8 @@ const Store = (() => {
   }
 
   return {
-    init, login, logout, isLoggedIn, currentUser,
+    init, login, loginMensaje, logout, isLoggedIn, currentUser, isAdmin,
+    getUsers, crearUsuario, editarUsuario, restablecerPassword, cambiarEstadoUsuario,
     getProducts, getProduct, getCategories, totalStock, isBajoPedido, statusOf,
     skuExists, addProduct, updateProduct, addStock,
     transfer,

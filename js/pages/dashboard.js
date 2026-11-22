@@ -35,15 +35,23 @@ document.addEventListener("DOMContentLoaded", async () => {
     { href: "ingreso-stock.html", ic: "package", t: "Ingresar Stock", s: "Registrar entradas y nuevos productos" },
     { href: "traslado.html", ic: "repeat", t: "Traslado", s: "Mover unidades entre bodegas" },
     { href: "proveedores.html", ic: "shop", t: "Proveedores", s: "Catálogos bajo pedido en Santiago" }
-  ];
+  ].filter((q) => Store.isAdmin() || q.href !== "traslado.html"); /* RF-02: traslado solo jefe */
+  /* El vendedor ve "Mi perfil" en lugar del traslado: la rejilla queda pareja */
+  if (!Store.isAdmin()) quick.push({ perfil: true, ic: "user", t: "Mi perfil", s: "Ver tu cuenta y tus permisos" });
   document.getElementById("quickAccess").innerHTML = quick.map((q) => `
-    <div class="col">
-      <a href="${q.href}" class="card action-card p-3 h-100">
+      <a href="${q.href || "#"}" class="card action-card p-3 h-100"${q.perfil ? " data-perfil" : ""}>
         <span class="action-icon">${icon(q.ic)}</span>
         <span class="action-title mt-2">${q.t}</span>
         <span class="action-sub">${q.s}</span>
-      </a>
-    </div>`).join("");
+      </a>`).join("");
+
+  const perfilCard = document.querySelector("#quickAccess [data-perfil]");
+  if (perfilCard) {
+    perfilCard.addEventListener("click", (e) => {
+      e.preventDefault();
+      if (typeof window.abrirGestorUsuarios === "function") window.abrirGestorUsuarios();
+    });
+  }
 
   /* ---- Lista de alertas ---- */
   const list = document.getElementById("alertsList");

@@ -174,29 +174,33 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
       if (!registrados.length) return;
 
-      /* Excel con todo lo ingresado, listo para adjuntar al correo */
-      try {
-        const ahora = new Date();
-        const fechaTxt = ahora.toLocaleString("es-CL");
-        const usuario = (Store.currentUser() || {}).nombre || "";
-        const filas = registrados.map((it, i) => [
-          i + 1, it.p.sku, it.p.nombre, it.qty, it.destino,
-          it.p.precio, it.p.precio * it.qty, fechaTxt, usuario
-        ]);
-        const total = registrados.reduce((s, it) => s + it.p.precio * it.qty, 0);
-        filas.push(["", "", "", "", "", "TOTAL", total, "", ""]);
-        Excel.descargar(
-          `ingreso-${Excel.fechaArchivo(ahora)}.xlsx`,
-          "Ingreso de stock",
-          ["#", "SKU", "Producto", "Cantidad", "Bodega destino", "Precio unitario", "Valor total", "Fecha", "Responsable"],
-          filas
-        );
-      } catch (err) {
-        console.warn("No se pudo generar el Excel:", err);
+      /* Excel con todo lo ingresado (RF-10: solo el administrador exporta) */
+      const n = registrados.length;
+      if (Store.isAdmin()) {
+        try {
+          const ahora = new Date();
+          const fechaTxt = ahora.toLocaleString("es-CL");
+          const usuario = (Store.currentUser() || {}).nombre || "";
+          const filas = registrados.map((it, i) => [
+            i + 1, it.p.sku, it.p.nombre, it.qty, it.destino,
+            it.p.precio, it.p.precio * it.qty, fechaTxt, usuario
+          ]);
+          const total = registrados.reduce((s, it) => s + it.p.precio * it.qty, 0);
+          filas.push(["", "", "", "", "", "TOTAL", total, "", ""]);
+          Excel.descargar(
+            `ingreso-${Excel.fechaArchivo(ahora)}.xlsx`,
+            "Ingreso de stock",
+            ["#", "SKU", "Producto", "Cantidad", "Bodega destino", "Precio unitario", "Valor total", "Fecha", "Responsable"],
+            filas
+          );
+        } catch (err) {
+          console.warn("No se pudo generar el Excel:", err);
+        }
       }
 
-      const n = registrados.length;
-      toast(`Ingreso registrado: ${n} producto${n === 1 ? "" : "s"}. Excel descargado — adjúntalo a tu correo.`);
+      toast(Store.isAdmin()
+        ? `Ingreso registrado: ${n} producto${n === 1 ? "" : "s"}. Excel descargado — adjúntalo a tu correo.`
+        : `Ingreso registrado: ${n} producto${n === 1 ? "" : "s"}.`);
       lista = [];
       renderLista();
       restockQty.value = 1;

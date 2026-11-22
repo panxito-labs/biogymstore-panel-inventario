@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (Store.login(email, password)) {
       window.location.href = "dashboard.html";
     } else {
-      toast("Usuario o contraseña incorrectos.", false);
+      toast(Store.loginMensaje(), false);
     }
   });
 

@@ -1,4 +1,5 @@
 ﻿const SEED = {
+  /* Usuario legado (se migra a users en store.js si no existe users) */
   user: {
     email: "demo@biogym.cl",
     password: "demo1234",
@@ -6,6 +7,11 @@
     rol: "Administrador (demo)",
     iniciales: "UD"
   },
+  /* RF-02: cuentas del sistema. rol: "admin" (Jefe) | "vendedor" (Trabajador) */
+  users: [
+    { id: 1, email: "demo@biogym.cl", password: "demo1234", nombre: "Usuario Demo", rol: "admin", iniciales: "UD", activo: true },
+    { id: 2, email: "vendedor@biogym.cl", password: "vendedor1234", nombre: "Vendedor Demo", rol: "vendedor", iniciales: "VD", activo: true }
+  ],
   warehouses: ["Bodega Tienda", "Bodega Casa Jefe"],
   categories: ["Suplementos", "Pesas", "Indumentaria", "Accesorios", "Nutrición", "Barritas"],
   products: [
@@ -101,7 +107,7 @@
 };
 
 async function loadSeedData() {
-  const res = await fetch("data/seed.json?v=20261121-1");
+  const res = await fetch("data/seed.json?v=20261121-3");
   if (!res.ok) throw new Error("HTTP " + res.status);
   return res.json();
 }

@@ -6,6 +6,10 @@
     "rol": "Administrador (demo)",
     "iniciales": "UD"
   },
+  "users": [
+    { "id": 1, "email": "demo@biogym.cl", "password": "demo1234", "nombre": "Usuario Demo", "rol": "admin", "iniciales": "UD", "activo": true },
+    { "id": 2, "email": "vendedor@biogym.cl", "password": "vendedor1234", "nombre": "Vendedor Demo", "rol": "vendedor", "iniciales": "VD", "activo": true }
+  ],
   "warehouses": ["Bodega Tienda", "Bodega Casa Jefe"],
   "categories": ["Suplementos", "Pesas", "Indumentaria", "Accesorios", "Nutrición", "Barritas"],
   "products": [
