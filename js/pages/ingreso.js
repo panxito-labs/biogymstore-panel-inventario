@@ -186,7 +186,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             it.p.precio, it.p.precio * it.qty, fechaTxt, usuario
           ]);
           const total = registrados.reduce((s, it) => s + it.p.precio * it.qty, 0);
-          filas.push(["", "", "", "", "", "TOTAL", total, "", ""]);
+          /* Fila TOTAL: rótulo en negrita alineado a la derecha (columna Producto) + valor */
+          filas.push(["", "", "", { v: "TOTAL", b: true, r: true }, "", "", total, "", ""]);
           Excel.descargar(
             `ingreso-${Excel.fechaArchivo(ahora)}.xlsx`,
             "Ingreso de stock",
