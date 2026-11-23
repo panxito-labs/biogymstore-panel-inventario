@@ -24,6 +24,7 @@ const Store = (() => {
       db = cached;
       ensureSales();
       ensureUsers();
+      ensureBsale();
       return;
     }
     try {
@@ -33,12 +34,13 @@ const Store = (() => {
     }
     ensureSales();
     ensureUsers();
+    ensureBsale();
     save();
   }
 
   function init() {
     if (!ready) {
-      ready = load().catch(() => { db = clone(SEED); ensureSales(); ensureUsers(); });
+      ready = load().catch(() => { db = clone(SEED); ensureSales(); ensureUsers(); ensureBsale(); });
     }
     return ready;
   }
@@ -259,6 +261,7 @@ const Store = (() => {
     db.products.push(product);
     if (!data.bajoPedido) {
       addMovement(product.nombre, "ingreso", "Ingreso manual", data.destino, product.stock[data.destino]);
+      syncLog("ingreso", `Ingreso en la aplicación: +${product.stock[data.destino]} u. de ${product.nombre} (${data.destino}) → stock actualizado en Bsale.`);
     }
     save();
     return product;
@@ -302,6 +305,7 @@ const Store = (() => {
     if (!(cantidad > 0)) return { ok: false, msg: "La cantidad debe ser mayor a 0." };
     p.stock[destino] = (p.stock[destino] || 0) + cantidad;
     addMovement(p.nombre, "ingreso", "Ingreso manual", destino, cantidad);
+    syncLog("ingreso", `Ingreso en la aplicación: +${cantidad} u. de ${p.nombre} (${destino}) → stock actualizado en Bsale.`);
     save();
     return { ok: true, msg: `Se ingresaron ${cantidad} unidades a ${destino}.` };
   }
@@ -379,6 +383,75 @@ const Store = (() => {
 
   function getMovements() {
     return db.movements.slice();
+  }
+
+  /* ---------- RF-08: Integración con Bsale (simulación) ---------- */
+  /* El sitio es estático (sin backend), así que la integración se simula:
+     - Una venta registrada en Bsale descuenta el stock de la aplicación.
+     - Un ingreso en la aplicación "actualiza" el stock en Bsale. */
+
+  function ensureBsale() {
+    if (!db) return;
+    if (!Array.isArray(db.bsales)) db.bsales = [];
+    if (!Array.isArray(db.bsaleLog)) db.bsaleLog = [];
+  }
+
+  function syncLog(tipo, detalle) {
+    ensureBsale();
+    db.bsaleLog.unshift({
+      id: Date.now() + Math.random(),
+      fecha: new Date().toISOString(),
+      tipo,
+      detalle
+    });
+    if (db.bsaleLog.length > 50) db.bsaleLog.pop();
+  }
+
+  /* Venta registrada en Bsale: descuenta el stock en la aplicación */
+  function registrarVentaBsale(id, cantidad, bodega) {
+    if (!isAdmin()) return { ok: false, msg: "Solo el jefe puede registrar ventas de Bsale." };
+    ensureBsale();
+    const p = getProduct(id);
+    if (!p) return { ok: false, msg: "Producto no encontrado." };
+    cantidad = Number(cantidad);
+    if (!(cantidad > 0)) return { ok: false, msg: "La cantidad debe ser mayor a 0." };
+    const disponible = p.stock[bodega] || 0;
+    if (cantidad > disponible) {
+      return { ok: false, msg: `Stock insuficiente en ${bodega} (disponible: ${disponible}).` };
+    }
+    p.stock[bodega] = disponible - cantidad;
+    const idVenta = db.bsales.reduce((m, v) => Math.max(m, Number(v.id) || 0), 0) + 1;
+    const venta = {
+      id: idVenta,
+      fecha: new Date().toISOString(),
+      productoId: p.id,
+      sku: p.sku,
+      producto: p.nombre,
+      unidades: cantidad,
+      precioUnit: p.precio,
+      total: p.precio * cantidad,
+      bodega,
+      usuario: (currentUser() || {}).nombre || "Sistema"
+    };
+    db.bsales.unshift(venta);
+    addMovement(p.nombre, "venta", bodega, "Bsale (venta)", cantidad);
+    syncLog("venta", `Venta #${idVenta} en Bsale: ${cantidad} × ${p.nombre} → stock descontado en la aplicación (${bodega}).`);
+    save();
+    return {
+      ok: true,
+      msg: `Venta #${idVenta} registrada en Bsale: ${cantidad} u. de ${p.nombre}. Stock descontado de ${bodega}.`,
+      venta
+    };
+  }
+
+  function getVentasBsale() {
+    ensureBsale();
+    return db.bsales.slice();
+  }
+
+  function getBsaleLog() {
+    ensureBsale();
+    return db.bsaleLog.slice();
   }
 
   /* ---------- Proveedores ---------- */
@@ -513,6 +586,7 @@ const Store = (() => {
     transfer,
     getWarehouses, addWarehouse, removeWarehouse,
     getMovements,
+    registrarVentaBsale, getVentasBsale, getBsaleLog,
     getSales, statsFor,
     getSuppliers, getBajoPedido,
     reset, LOW_STOCK

@@ -100,8 +100,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       window.location.replace("index.html");
       return;
     }
-    // RF-02: Traslado es exclusivo del jefe/administrador
-    if (page === "traslado" && !Store.isAdmin()) {
+    // RF-02 / RF-08: Traslado y Bsale son exclusivos del jefe/administrador
+    if ((page === "traslado" || page === "bsale") && !Store.isAdmin()) {
       window.location.replace("dashboard.html");
       return;
     }
@@ -153,7 +153,10 @@ function renderUser() {
 function aplicarPermisos() {
   const admin = Store.isAdmin();
 
-  // El enlace "Traslado" solo se muestra al jefe
+  // Opciones exclusivas del jefe (data-admin-only) y el enlace "Traslado"
+  document.querySelectorAll("[data-admin-only]").forEach((el) => {
+    el.classList.toggle("d-none", !admin);
+  });
   document.querySelectorAll('#mainNav a[href="traslado.html"]').forEach((a) => {
     const li = a.closest("li") || a;
     li.classList.toggle("d-none", !admin);

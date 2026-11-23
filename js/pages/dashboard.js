@@ -74,7 +74,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         <tr>
           <td class="text-secondary">${fechaCorta(m.fecha)}</td>
           <td>${m.producto}</td>
-          <td><span class="badge ${m.tipo === "traslado" ? "badge-soft-warning" : "badge-soft-success"}">${m.tipo === "traslado" ? "Traslado" : "Ingreso"}</span></td>
+          <td><span class="badge ${m.tipo === "venta" ? "badge-soft-danger" : m.tipo === "traslado" ? "badge-soft-warning" : "badge-soft-success"}">${m.tipo === "venta" ? "Venta" : m.tipo === "traslado" ? "Traslado" : "Ingreso"}</span></td>
           <td class="text-secondary">${m.origen} -&gt; ${m.destino}</td>
           <td class="text-end fw-bold">${m.unidades}</td>
         </tr>`).join("")

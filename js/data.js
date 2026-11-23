@@ -103,11 +103,14 @@
       web: "", contacto: "Sitio web por definir — Santiago"
     }
   ],
-  movements: []
+  movements: [],
+  /* RF-08: ventas simuladas de Bsale y registro de sincronización */
+  bsales: [],
+  bsaleLog: []
 };
 
 async function loadSeedData() {
-  const res = await fetch("data/seed.json?v=20261121-3");
+  const res = await fetch("data/seed.json?v=20261121-5");
   if (!res.ok) throw new Error("HTTP " + res.status);
   return res.json();
 }

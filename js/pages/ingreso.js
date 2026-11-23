@@ -201,6 +201,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       toast(Store.isAdmin()
         ? `Ingreso registrado: ${n} producto${n === 1 ? "" : "s"}. Excel descargado — adjúntalo a tu correo.`
         : `Ingreso registrado: ${n} producto${n === 1 ? "" : "s"}.`);
+      /* RF-08: el ingreso en la aplicación actualiza el stock en Bsale */
+      toast("Stock actualizado en Bsale (simulación).");
       lista = [];
       renderLista();
       restockQty.value = 1;

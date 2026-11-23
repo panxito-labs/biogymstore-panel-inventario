@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es" data-bs-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'">
+  <meta name="referrer" content="no-referrer">
+  <title>Bsale | BioGymStore</title>
+  <link rel="icon" type="image/png" href="img/favicon.png">
+  <link href="vendor/css/bootstrap.min.css?v=20261121-5" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css?v=20261121-5">
+</head>
+<body data-page="bsale">
+
+  <!-- NAVBAR -->
+  <nav id="mainNav" class="navbar navbar-expand-lg sticky-top">
+    <div class="container">
+      <a class="navbar-brand" href="dashboard.html">
+        <img src="img/logo.png" alt="BioGym Store" class="brand-logo-img">
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu" aria-label="Abrir menú">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <div class="collapse navbar-collapse" id="navMenu">
+        <ul class="navbar-nav me-auto gap-lg-2">
+          <li class="nav-item"><a class="nav-link" href="dashboard.html">Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link" href="inventario.html">Inventario</a></li>
+          <li class="nav-item"><a class="nav-link" href="ingreso-stock.html">Ingresar Stock</a></li>
+          <li class="nav-item" data-admin-only><a class="nav-link" href="traslado.html">Traslado</a></li>
+          <li class="nav-item"><a class="nav-link" href="proveedores.html">Proveedores</a></li>
+          <li class="nav-item" data-admin-only><a class="nav-link" href="bsale.html">Bsale</a></li>
+        </ul>
+        <div class="user-badge">
+          <span class="avatar js-user-initials">--</span>
+          <div class="user-info d-none d-sm-flex">
+            <span class="user-name js-user-name">--</span>
+            <span class="user-role js-user-role">--</span>
+          </div>
+          <button id="btnLogout" class="btn-logout">Cerrar sesión</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container py-4">
+
+    <section class="mb-4">
+      <p class="text-secondary mb-1">Simulación de la sincronización venta ↔ inventario</p>
+      <h1 class="h3 fw-bold mb-0">Integración con <span class="text-accent">Bsale</span></h1>
+    </section>
+
+    <!-- Aviso de simulación -->
+    <div class="restricted-notice mb-4">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Simulación · el sitio es estático: la conexión real con Bsale requiere backend y credenciales de API
+    </div>
+
+    <div class="row g-4">
+
+      <!-- Columna izquierda: estado + formulario de venta -->
+      <div class="col-lg-5 d-flex flex-column gap-4">
+
+        <section class="card">
+          <div class="card-header">Estado de la conexión</div>
+          <div class="card-body">
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <span class="badge badge-soft-success">Conectado (demo)</span>
+              <span class="fw-bold">BioGymStore ↔ Bsale</span>
+            </div>
+            <p class="text-secondary small mb-1">Los dos flujos del requisito quedan simulados:</p>
+            <ul class="text-secondary small ps-4 mb-0">
+              <li>Una venta registrada en Bsale <strong class="text-white">descuenta el stock</strong> de la aplicación.</li>
+              <li>Un ingreso en la aplicación <strong class="text-white">actualiza el stock</strong> en Bsale.</li>
+            </ul>
+            <div class="d-flex gap-4 mt-3">
+              <div>
+                <div class="fw-bold text-accent fs-5" id="bsaleCountVentas">0</div>
+                <small class="text-secondary">ventas sincronizadas</small>
+              </div>
+              <div>
+                <div class="fw-bold text-accent fs-5" id="bsaleCountSync">0</div>
+                <small class="text-secondary">eventos de sincronización</small>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-header">Simular venta en Bsale</div>
+          <div class="card-body">
+            <form id="saleForm" class="needs-validation" novalidate>
+              <div class="mb-3">
+                <label for="saleProduct" class="form-label">Producto</label>
+                <select id="saleProduct" class="form-select" required></select>
+                <div class="invalid-feedback">Selecciona un producto.</div>
+              </div>
+              <div class="row g-3 mb-3">
+                <div class="col-6">
+                  <label for="saleQty" class="form-label">Cantidad (unidades)</label>
+                  <input type="number" id="saleQty" class="form-control" min="1" value="1" required>
+                  <div class="invalid-feedback">Cantidad mayor a 0.</div>
+                </div>
+                <div class="col-6">
+                  <label for="saleWarehouse" class="form-label">Bodega de salida</label>
+                  <select id="saleWarehouse" class="form-select" required></select>
+                  <div class="invalid-feedback">Bodega.</div>
+                </div>
+              </div>
+              <p class="form-text text-secondary" id="saleInfo"></p>
+              <button type="submit" class="btn btn-accent w-100">Registrar venta en Bsale</button>
+            </form>
+          </div>
+        </section>
+      </div>
+
+      <!-- Columna derecha: ventas + sincronización -->
+      <div class="col-lg-7 d-flex flex-column gap-4">
+
+        <section class="card">
+          <div class="card-header">Ventas registradas en Bsale</div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table mb-0">
+                <thead>
+                  <tr>
+                    <th>N°</th>
+                    <th>Fecha</th>
+                    <th>Producto</th>
+                    <th class="text-end">Unidades</th>
+                    <th class="text-end">Total</th>
+                    <th>Estado</th>
+                  </tr>
+                </thead>
+                <tbody id="salesBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-header">Registro de sincronización</div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table mb-0">
+                <thead>
+                  <tr>
+                    <th>Fecha</th>
+                    <th>Evento</th>
+                    <th>Detalle</th>
+                  </tr>
+                </thead>
+                <tbody id="syncBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <footer class="app-footer text-center mt-4">
+      BioGymStore — Sistema interno de gestión de stock · Uso exclusivo del personal autorizado &middot; <span class="build-tag" data-build="20261121-5">v20261121-5</span>
+    </footer>
+  </main>
+
+  <script src="vendor/js/bootstrap.bundle.min.js?v=20261121-5"></script>
+  <script src="js/data.js?v=20261121-5"></script>
+  <script src="js/store.js?v=20261121-5"></script>
+  <script src="js/icons.js?v=20261121-5"></script>
+  <script src="js/app.js?v=20261121-5"></script>
+  <script src="js/usuarios.js?v=20261121-5"></script>
+  <script src="js/pages/bsale.js?v=20261121-5"></script>
+</body>
+</html>
