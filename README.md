@@ -222,12 +222,16 @@ columna calculados del contenido y fila TOTAL en negrita.
 
 ---
 
-## Accesibilidad
+## Accesibilidad y diseño responsive
 
 - Todos los campos del formulario tienen `label` asociado.
 - Contraste de texto verificado con Lighthouse: **100 % accesibilidad,
   100 % buenas prácticas, 100 % SEO**.
 - Iconos SVG propios con `aria-hidden` y botones con `aria-label`.
+- **Responsive verificado** en anchos reales de celular y tablet
+  (320 / 375 / 414 / 768 px): menú hamburguesa operativo, tarjetas apiladas,
+  tablas con desplazamiento horizontal interno y ventanas modales que se
+  adaptan a la pantalla, sin scroll horizontal no deseado.
 
 ---
 
