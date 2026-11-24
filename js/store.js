@@ -2,7 +2,7 @@ const Store = (() => {
   const DB_KEY = "biogym_db_v1";
   const SESSION_KEY = "biogym_session";
   const LOW_STOCK = 3;
-  const storage = window.sessionStorage; // Semana 5: pasar a localStorage
+  const storage = window.localStorage; // Persistencia: los datos sobreviven al cerrar el navegador
 
   let db = null;
   let ready = null;
