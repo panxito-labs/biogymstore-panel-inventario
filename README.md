@@ -35,10 +35,27 @@ Abrir `http://localhost:8099` en el navegador. También sirve la extensión
 
 ## Acceso de demostración
 
-| Rol | Usuario | Contraseña | Permisos |
-|-----|---------|------------|----------|
-| **Jefe / Administrador** | `demo@biogym.cl` | `demo1234` | Acceso total: traslado, bodegas, gestión de usuarios, Bsale y exportación a Excel |
-| **Vendedor** | `vendedor@biogym.cl` | `vendedor1234` | Consulta inventario e historial, ingresa mercadería, crea/edita fichas y ve proveedores |
+### Inicio de sesión — Jefe / Administrador (acceso total)
+
+| Campo | Valor |
+|-------|-------|
+| Usuario | `demo@biogym.cl` |
+| Contraseña | `demo1234` |
+
+Acceso completo: dashboard, inventario, ingreso de stock, traslado y bodegas,
+proveedores, integración con Bsale, gestión de usuarios y exportación a Excel.
+
+### Inicio de sesión — Vendedor (acceso limitado)
+
+| Campo | Valor |
+|-------|-------|
+| Usuario | `vendedor@biogym.cl` |
+| Contraseña | `vendedor1234` |
+
+Acceso limitado: consulta de inventario e historial de movimientos, ingreso de
+mercadería, creación y edición de fichas de producto y módulo de proveedores.
+No ve traslado, bodegas, Bsale, gestión de usuarios ni exportación a Excel
+(la URL directa a esas páginas lo redirige al dashboard).
 
 Para restaurar los datos de prueba: consola del navegador (F12) → `Store.reset()`.
 
@@ -232,6 +249,28 @@ columna calculados del contenido y fila TOTAL en negrita.
   (320 / 375 / 414 / 768 px): menú hamburguesa operativo, tarjetas apiladas,
   tablas con desplazamiento horizontal interno y ventanas modales que se
   adaptan a la pantalla, sin scroll horizontal no deseado.
+
+---
+
+## Pruebas y verificación
+
+Todo el sistema fue probado en navegador con ambos roles (jefe y vendedor),
+con **0 errores de consola** en las 7 páginas:
+
+| Flujo probado | Resultado |
+|---|---|
+| Login con credenciales válidas / inválidas / cuenta desactivada | ✅ con mensajes correctos |
+| Gestión de usuarios: crear, editar, restablecer contraseña, desactivar y reactivar | ✅ con protecciones (no desactivar la propia cuenta, siempre ≥1 administrador activo, correos únicos) |
+| Ficha de producto y edición (nombre, SKU único, categoría, precio, descripción, imagen) | ✅ se refleja en el listado |
+| Búsqueda en vivo y filtro por categoría | ✅ |
+| Ingreso de stock en grupo (1 o N productos) + descarga del Excel | ✅ con fila TOTAL |
+| Crear producto nuevo con imagen por URL o archivo | ✅ con compresión a 600 px |
+| Traslado entre bodegas con validación de stock + alta/baja de bodegas | ✅ |
+| Bsale: venta que descuenta stock e ingreso que sincroniza | ✅ bidireccional |
+| Exportación de inventario y de historial a Excel | ✅ archivos `.xlsx` válidos (ZIP/XML verificados) |
+| Roles: vendedor sin acceso a traslado, Bsale, usuarios ni exportación (incluida URL directa) | ✅ redirigido al dashboard |
+| Lighthouse (accesibilidad, buenas prácticas, SEO) | ✅ 100 / 100 / 100 |
+| Responsive 320 / 375 / 414 / 768 px | ✅ sin scroll horizontal, menú y modales correctos |
 
 ---
 
