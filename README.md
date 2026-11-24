@@ -43,7 +43,7 @@ Abrir `http://localhost:8099` en el navegador. También sirve la extensión
 | Contraseña | `demo1234` |
 
 Acceso completo: dashboard, inventario, ingreso de stock, traslado y bodegas,
-proveedores, integración con Bsale, gestión de usuarios y exportación a Excel.
+proveedores, integración con Bsale (simulada), gestión de usuarios y exportación a Excel.
 
 ### Inicio de sesión — Vendedor (acceso limitado)
 
@@ -83,10 +83,11 @@ Para restaurar los datos de prueba: consola del navegador (F12) → `Store.reset
   de disponibilidad y gestiona bodegas (agregar/eliminar).
 - **Proveedores** — fichas de proveedores y productos "bajo pedido" con cotización
   directa a su sitio web.
-- **Integración con Bsale** *(solo jefe)* — simulación de la sincronización
-  bidireccional: una venta registrada en Bsale **descuenta el stock** de la
-  aplicación y un ingreso en la aplicación **actualiza el stock** en Bsale, con
-  registro de sincronización. *(Ver detalle en el ERS más abajo.)*
+- **Integración con Bsale** *(solo jefe, simulado)* — el flujo de venta y stock
+  se muestra a modo de ejemplo académico: una venta registrada en Bsale
+  descuenta el stock de la aplicación y un ingreso en la aplicación actualiza el
+  stock en Bsale, con registro de sincronización. Todo queda en el navegador;
+  no hay conexión real con la API de Bsale. *(Ver nota al final del ERS.)*
 - **Gestión de usuarios** *(solo jefe)* — crear, editar, desactivar/reactivar cuentas
   y restablecer contraseñas, desde el badge de usuario del navbar. El vendedor solo
   ve su perfil.
@@ -104,7 +105,7 @@ Para restaurar los datos de prueba: consola del navegador (F12) → `Store.reset
 | Historial de movimientos | ✅ | ✅ |
 | Crear y editar fichas de producto | ✅ | ✅ |
 | Traslado de stock y gestión de bodegas | ✅ | ❌ |
-| Integración con Bsale | ✅ | ❌ |
+| Integración con Bsale (simulada) | ✅ | ❌ |
 | Gestión de usuarios | ✅ | ❌ (solo ve su perfil) |
 | Exportar reportes a Excel | ✅ | ❌ |
 
@@ -156,11 +157,13 @@ vendor/               Bootstrap 5.3.3 local (CSS + JS bundle)
 | RF-09 | Historial de movimientos | ✅ | `inventario.html` — fecha, usuario y detalle |
 | RF-10 | Exportación de reportes | ✅ | Excel: inventario, historial e ingreso (solo jefe) |
 
-¹ El sitio es estático (sin backend), por lo que la integración se **simula**
-conservando el flujo completo del requisito: una venta en Bsale descuenta el stock
-de la aplicación y un ingreso en la aplicación actualiza el stock en Bsale, dejando
-constancia en el registro de sincronización. Una integración real requiere
-credenciales de la API de Bsale y un servidor que reciba y procese los webhooks.
+¹ Esta integración es una simulacion academica. El sitio no tiene backend ni
+credenciales de la API de Bsale, por lo que no se conecta con el sistema real de
+Bsale. Lo que se muestra es el flujo del requisito RF-08 a modo de ejemplo para
+la clase: una venta en Bsale descuenta el stock de la aplicación y un ingreso en
+la aplicación actualiza el stock en Bsale, todo dentro del navegador y guardado
+en la sesión. Una integración real con Bsale requiere un servidor y credenciales
+de API, lo cual está fuera del alcance de este proyecto de Interfaz de Usuario.
 
 ---
 
@@ -266,7 +269,7 @@ con **0 errores de consola** en las 7 páginas:
 | Ingreso de stock en grupo (1 o N productos) + descarga del Excel | ✅ con fila TOTAL |
 | Crear producto nuevo con imagen por URL o archivo | ✅ con compresión a 600 px |
 | Traslado entre bodegas con validación de stock + alta/baja de bodegas | ✅ |
-| Bsale: venta que descuenta stock e ingreso que sincroniza | ✅ bidireccional |
+| Bsale: venta que descuenta stock e ingreso que sincroniza (simulado) | ✅ bidireccional |
 | Exportación de inventario y de historial a Excel | ✅ archivos `.xlsx` válidos (ZIP/XML verificados) |
 | Roles: vendedor sin acceso a traslado, Bsale, usuarios ni exportación (incluida URL directa) | ✅ redirigido al dashboard |
 | Lighthouse (accesibilidad, buenas prácticas, SEO) | ✅ 100 / 100 / 100 |
